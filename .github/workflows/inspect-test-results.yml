@@ -14,6 +14,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -21,7 +22,9 @@ jobs:
           name: iphone-test-results
           path: recovered
       - name: Export screenshots from existing native test results
-        run: xcrun xcresulttool export attachments --path recovered/Commons.xcresult --output-path screenshots
+        run: |
+          xcrun xcresulttool export attachments --path recovered/Commons.xcresult --output-path screenshots
+          python3 tools/export_preview.py screenshots screenshots/iphone-preview.png
       - uses: actions/upload-artifact@v6
         with:
           name: native-test-screenshots

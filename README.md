@@ -50,7 +50,7 @@ Omit `--date` to use the current Chicago day when Python has timezone data insta
 
 The pure Foundation core is separated into a Swift package. After installing [Swift for Windows and its platform dependencies](https://www.swift.org/install/windows/), run `swift test` to exercise the actual parser, dietary logic, preferences, and cache. Windows cannot run the native SwiftUI iPhone UI or Apple's iOS Simulator; [Simulator ships with Xcode](https://help.apple.com/xcode/mac/current/en.lproj/devfd9e28378.html).
 
-The **iOS checks** GitHub workflow builds and tests the native app on a macOS iPhone simulator. It includes a UI test that changes the halal filter and verifies it survives relaunch. Open the workflow run from Windows and download **iphone-test-results** to view `iphone-preview.png` and the build log. The screenshot uses explicitly labeled synthetic test dishes; release builds use the live shared service. Full `.xcresult` bundles include UI-test screenshots and can be inspected with Xcode on a Mac.
+The **iOS checks** GitHub workflow builds and tests the native app on a macOS iPhone simulator. It includes a UI test that changes the halal filter and verifies it survives relaunch. Open the workflow run from Windows and download **iphone-test-results** to view `iphone-preview.png`, the other PNG screenshots in `screenshots/`, and the build log. Screenshots use explicitly labeled synthetic test dishes; release builds use the live shared service. Full `.xcresult` bundles can be inspected with Xcode on a Mac. The **Export native test screenshots** workflow also converts an existing run's results into Windows-readable images when supplied its run ID.
 
 On macOS:
 

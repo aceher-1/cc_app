@@ -20,17 +20,12 @@ jobs:
           mkdir -p build
           set -o pipefail
           xcodebuild test -project Commons.xcodeproj -scheme Commons -destination "platform=iOS Simulator,id=$SIMULATOR_ID" -resultBundlePath build/Commons.xcresult CODE_SIGNING_ALLOWED=NO | tee build/xcodebuild.log
-      - name: Capture simulator screenshot for Windows review
-        if: success()
-        run: |
-          xcrun simctl launch "$SIMULATOR_ID" com.example.msoecommons --ui-testing
-          sleep 3
-          xcrun simctl io "$SIMULATOR_ID" screenshot build/iphone-preview.png
       - name: Export test screenshots as PNG for Windows review
         if: always()
         run: |
           if [ -d build/Commons.xcresult ]; then
             xcrun xcresulttool export attachments --path build/Commons.xcresult --output-path build/screenshots
+            python3 tools/export_preview.py build/screenshots build/iphone-preview.png
           fi
       - uses: actions/upload-artifact@v6
         if: always()
