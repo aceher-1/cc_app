@@ -141,7 +141,7 @@ struct MenuView: View {
                     Button("Edit dietary filters") { showFilters = true }
                 } else {
                     HStack {
-                        Text("\(store.visibleCount) dishes").font(.headline)
+                        Text("\(store.visibleCount) \(store.visibleCount == 1 ? "dish" : "dishes")").font(.headline)
                         Spacer()
                         if store.preferences.count > 0 {
                             Button("Filters on") { showFilters = true }.font(.caption.weight(.semibold))

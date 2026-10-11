@@ -101,7 +101,7 @@ final class MenuStore: ObservableObject {
         } catch let error as URLError where error.code == .cancelled {
             defaults.removeObject(forKey: attemptKey)
         } catch {
-            let detail = (error as? LocalizedError)?.errorDescription ?? "Unable to connect to the dining website."
+            let detail = (error as? LocalizedError)?.errorDescription ?? "Unable to connect to the shared menu service."
             messages[key] = menus[key] == nil ? detail : "Showing the saved menu. \(detail)"
         }
     }
