@@ -1,0 +1,46 @@
+name: Build iPhone IPA
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build release app for physical iPhones
+        run: |
+          mkdir -p build
+          xcodebuild -version
+          set -o pipefail
+          xcodebuild build -project Commons.xcodeproj -scheme Commons \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY='' \
+            | tee build/device-build.log
+      - name: Check device architecture and package unsigned IPA
+        run: |
+          APP=build/DerivedData/Build/Products/Release-iphoneos/Commons.app
+          test "$(xcrun lipo -archs "$APP/Commons")" = arm64
+          xcrun vtool -show-build "$APP/Commons" | tee build/device-platform.txt
+          grep -Eq 'platform[[:space:]]+IOS$' build/device-platform.txt
+          /usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$APP/Info.plist"
+          mkdir -p build/Payload build/download
+          ditto "$APP" build/Payload/Commons.app
+          ditto -c -k --keepParent build/Payload build/download/Commons-unsigned.ipa
+          cp INSTALL.md build/download/INSTALL.md
+          cp build/device-platform.txt build/download/device-platform.txt
+          shasum -a 256 build/download/Commons-unsigned.ipa > build/download/SHA256.txt
+      - uses: actions/upload-artifact@v6
+        with:
+          name: commons-iphone-ipa
+          path: build/download/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Save build log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: iphone-device-build-log
+          path: build/device-build.log
