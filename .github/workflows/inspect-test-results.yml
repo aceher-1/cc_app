@@ -1,0 +1,28 @@
+name: Export native test screenshots
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: iOS checks run ID whose screenshots should be exported
+        required: true
+        type: string
+permissions:
+  actions: read
+  contents: read
+jobs:
+  export:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.run_id }}
+          name: iphone-test-results
+          path: recovered
+      - name: Export screenshots from existing native test results
+        run: xcrun xcresulttool export attachments --path recovered/Commons.xcresult --output-path screenshots
+      - uses: actions/upload-artifact@v6
+        with:
+          name: native-test-screenshots
+          path: screenshots/

@@ -26,6 +26,12 @@ jobs:
           xcrun simctl launch "$SIMULATOR_ID" com.example.msoecommons --ui-testing
           sleep 3
           xcrun simctl io "$SIMULATOR_ID" screenshot build/iphone-preview.png
+      - name: Export test screenshots as PNG for Windows review
+        if: always()
+        run: |
+          if [ -d build/Commons.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Commons.xcresult --output-path build/screenshots
+          fi
       - uses: actions/upload-artifact@v6
         if: always()
         with:
