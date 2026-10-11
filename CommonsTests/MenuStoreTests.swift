@@ -4,16 +4,44 @@ import XCTest
 private actor StubMenuService: MenuFetching {
     private(set) var calls = 0
     var fail = false
+    private var publicationTime: Date?
     func setFail(_ value: Bool) { fail = value }
+    func setPublicationTime(_ value: Date) { publicationTime = value }
     func fetch(dateKey: String, now: Date) async throws -> DayMenu {
         calls += 1
         if fail { throw URLError(.notConnectedToInternet) }
-        return DayMenu(dateKey: dateKey, fetchedAt: now, meals: [])
+        return DayMenu(dateKey: dateKey, fetchedAt: publicationTime ?? now, meals: [], checkedAt: now)
     }
 }
 
 @MainActor
 final class MenuStoreTests: XCTestCase {
+    func testEarlyOpeningRetriesStalePublicationHourlyThenReusesFreshData() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let suite = "CommonsPublicationTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { try? FileManager.default.removeItem(at: directory); defaults.removePersistentDomain(forName: suite) }
+        let now = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-11T15:00:00Z"))
+        let service = StubMenuService()
+        await service.setPublicationTime(now.addingTimeInterval(-86400))
+        let store = MenuStore(service: service, cache: DailyCache(directory: directory), defaults: defaults)
+        store.selectedDateKey = "2026-10-11"
+        await store.load(now: now)
+        await store.load(now: now.addingTimeInterval(1800))
+        var calls = await service.calls
+        XCTAssertEqual(calls, 1)
+        XCTAssertNotNil(store.message)
+        await store.load(now: now.addingTimeInterval(3601))
+        calls = await service.calls
+        XCTAssertEqual(calls, 2)
+        await service.setPublicationTime(now.addingTimeInterval(7200))
+        await store.load(now: now.addingTimeInterval(7202))
+        await store.load(now: now.addingTimeInterval(10800))
+        calls = await service.calls
+        XCTAssertEqual(calls, 3)
+        XCTAssertNil(store.message)
+    }
+
     func testChangingFilterFieldsPersistsAcrossStoreInstances() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let suite = "CommonsPreferenceTests.\(UUID().uuidString)"
