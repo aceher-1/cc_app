@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Breakfast",
+    "groups": [{
+      "name": "Plant Kitchen",
+      "items": [
+        {"menuItemId": 0, "formalName": "Oat Bowl", "ingredients": "Oats, soy milk, almonds", "allergens": [{"allergen":"SO","name":"Soy"},{"allergen":"TREE_NUTS","name":"Tree nuts"}], "isVegan":true,"isVegetarian":true,"isPlantBased":true,"calories":"200"},
+        {"menuItemId": 0, "formalName": "Eggs", "ingredients":"Eggs, oil", "allergens":[{"allergen":"EGGS","name":"Egg"}], "isVegetarian":true,"calories":90}
+      ]
+    }]
+  },
+  {"name":"Dinner", "groups":[{"name":"Grill", "items":[{"menuItemId":0,"formalName":"Unlisted Ingredients Dish"}]}]}
+]
