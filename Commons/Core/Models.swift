@@ -69,5 +69,12 @@ struct DayMenu: Codable, Equatable {
     let dateKey: String
     let fetchedAt: Date
     let meals: [MenuMeal]
+    let checkedAt: Date?
+    init(dateKey: String, fetchedAt: Date, meals: [MenuMeal], checkedAt: Date? = nil) {
+        self.dateKey = dateKey
+        self.fetchedAt = fetchedAt
+        self.meals = meals
+        self.checkedAt = checkedAt
+    }
     var itemCount: Int { meals.reduce(0) { $0 + $1.itemCount } }
 }

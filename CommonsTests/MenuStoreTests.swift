@@ -81,9 +81,14 @@ final class MenuStoreTests: XCTestCase {
         calls = await service.calls
         XCTAssertEqual(calls, 2)
     }
-    func testSourceDiscoveryPatternsMatchPublicWidgetConfiguration() {
-        let html = #"<script src="/static/js/main.abc123.js"></script>{"locationId":"35236001","menuId":"1411038"}"#
-        XCTAssertEqual(SodexoMenuService.capture(#""locationId"\s*:\s*"([0-9]+)""#, in: html), "35236001")
-        XCTAssertEqual(SodexoMenuService.capture(#"src="(/static/js/main\.[a-zA-Z0-9]+\.js)""#, in: html), "/static/js/main.abc123.js")
+    func testSharedFeedPreservesSourceTimestampAndRejectsWrongDate() throws {
+        let data = Data(#"{"schemaVersion":1,"date":"2026-10-11","updatedAt":"2026-10-11T09:23:00Z","meals":[]}"#.utf8)
+        let now = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-12T15:00:00Z"))
+        let menu = try SharedMenuService.decode(data, dateKey: "2026-10-11", checkedAt: now)
+        XCTAssertEqual(menu.checkedAt, now)
+        XCTAssertTrue(DiningDay.isFresh(menu, now: now))
+        XCTAssertFalse(DiningDay.isSourceFresh(menu, now: now))
+        XCTAssertThrowsError(try SharedMenuService.decode(data, dateKey: "2026-10-12", checkedAt: now))
+        XCTAssertThrowsError(try SharedMenuService.decode(Data("[]".utf8), dateKey: "2026-10-11", checkedAt: now))
     }
 }

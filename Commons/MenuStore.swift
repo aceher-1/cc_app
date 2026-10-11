@@ -17,7 +17,7 @@ final class MenuStore: ObservableObject {
     private let defaults: UserDefaults
     private var lastTodayKey: String
 
-    init(service: any MenuFetching = SodexoMenuService(), cache: DailyCache = DailyCache(), defaults: UserDefaults = .standard) {
+    init(service: any MenuFetching = SharedMenuService(), cache: DailyCache = DailyCache(), defaults: UserDefaults = .standard) {
         self.service = service
         self.cache = cache
         self.defaults = defaults
@@ -73,7 +73,11 @@ final class MenuStore: ObservableObject {
         let key = selectedDateKey
         if menus[key] == nil, let saved = cache.read(key) { menus[key] = saved }
         guard !loadingDates.contains(key) else { return }
-        if !force, let saved = menus[key], DiningDay.isFresh(saved, now: now) { return }
+        if !force, let saved = menus[key], DiningDay.isFresh(saved, now: now) {
+            // An early opening before the daily server job must not pin yesterday's snapshot all day.
+            if DiningDay.isSourceFresh(saved, now: now)
+                || now.timeIntervalSince(saved.checkedAt ?? saved.fetchedAt) < 3600 { return }
+        }
         let attemptKey = "commons.lastAttempt.\(key)"
         if !force, let attempt = defaults.object(forKey: attemptKey) as? Date, now.timeIntervalSince(attempt) < 300 {
             if messages[key] == nil { messages[key] = "The last refresh did not finish. Retry manually or wait a few minutes." }
@@ -86,6 +90,9 @@ final class MenuStore: ObservableObject {
         do {
             let menu = try await service.fetch(dateKey: key, now: now)
             menus[key] = menu
+            if !DiningDay.isSourceFresh(menu, now: now) {
+                messages[key] = "The shared menu has not updated today. Showing its latest published version."
+            }
             do { try cache.write(menu) }
             catch { messages[key] = "Menu loaded, but could not be saved for offline use." }
         } catch is CancellationError {

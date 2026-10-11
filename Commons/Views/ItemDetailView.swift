@@ -43,7 +43,7 @@ struct ItemDetailView: View {
                 nutrition("Carbohydrates", value: item.carbohydrates)
                 nutrition("Fat", value: item.fat)
             }
-            Section { Link("View original dining menu", destination: SodexoMenuService.sourceURL) }
+            Section { Link("View original dining menu", destination: SharedMenuService.sourceURL) }
         }
         .navigationTitle("Dish details").navigationBarTitleDisplayMode(.inline)
     }

@@ -32,6 +32,7 @@ struct MenuView: View {
                             if store.preferences.count > 0 { Text("\(store.preferences.count)").font(.caption.bold()) }
                         }
                     }.accessibilityLabel("Dietary filters, \(store.preferences.count) selected")
+                        .accessibilityIdentifier("filters.open")
                 }
             }
             .searchable(text: $store.searchText, prompt: "Search dishes or stations")
@@ -178,13 +179,13 @@ struct MenuView: View {
             if let menu = store.currentMenu {
                 Label("Updated \(DiningDay.label(menu.fetchedAt, format: "MMM d, h:mm a")) · Milwaukee time", systemImage: "clock")
                     .font(.caption).foregroundStyle(.secondary)
-                if !DiningDay.isFresh(menu, now: Date()) {
+                if !DiningDay.isSourceFresh(menu, now: Date()) {
                     Text("Saved menu from an earlier day. It may have changed.").font(.caption).foregroundStyle(.secondary)
                 }
             }
             Text("Diet and allergen labels come from Sodexo. Shared equipment and ingredient changes can affect suitability; confirm with dining staff.")
                 .font(.caption).foregroundStyle(.secondary)
-            Link(destination: SodexoMenuService.sourceURL) { Label("View Sodexo’s original menu", systemImage: "arrow.up.right.square") }
+            Link(destination: SharedMenuService.sourceURL) { Label("View Sodexo’s original menu", systemImage: "arrow.up.right.square") }
                 .font(.subheadline.weight(.medium))
         }.padding(.horizontal, 24)
     }

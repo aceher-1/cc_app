@@ -1,0 +1,46 @@
+name: Publish daily menus
+on:
+  push:
+    paths:
+      - tools/refresh_menus.py
+      - tools/tests/**
+      - .github/workflows/menus.yml
+  schedule:
+    - cron: '23 4 * * *'
+      timezone: America/Chicago
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: shared-menu-publication
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test publication and failure handling
+        run: python -m unittest discover -s tools/tests -v
+      - name: Fetch all menu dates once centrally
+        run: python tools/refresh_menus.py --output _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish shared menu snapshots
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -24,6 +24,7 @@ struct FiltersView: View {
                 }
                 Section {
                     Toggle("Halal: potentially suitable", isOn: $store.preferences.halalPotentiallySuitable)
+                        .accessibilityIdentifier("filter.halal")
                     Text(HalalAssessment.explanation).font(.footnote).foregroundStyle(.secondary)
                 } header: { Text("Halal ingredient screen") }
                 Section {
@@ -33,7 +34,7 @@ struct FiltersView: View {
             .tint(CommonsTheme.red)
             .navigationTitle("Dietary preferences")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.accessibilityIdentifier("filters.done") } }
         }
     }
     private func allergenBinding(_ allergen: Allergen) -> Binding<Bool> {

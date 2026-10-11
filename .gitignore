@@ -6,3 +6,4 @@ DerivedData/
 xcuserdata/
 __pycache__/
 .swiftpm/
+_site/

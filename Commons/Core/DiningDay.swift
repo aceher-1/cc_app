@@ -30,6 +30,10 @@ enum DiningDay {
         return formatter.string(from: date)
     }
     static func isFresh(_ menu: DayMenu, now: Date) -> Bool {
+        let checked = menu.checkedAt ?? menu.fetchedAt
+        return key(for: checked) == key(for: now) && checked <= now
+    }
+    static func isSourceFresh(_ menu: DayMenu, now: Date) -> Bool {
         key(for: menu.fetchedAt) == key(for: now) && menu.fetchedAt <= now
     }
 }

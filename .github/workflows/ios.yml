@@ -8,7 +8,7 @@ jobs:
   test:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Test menu parsing, filters, preferences, and cache
         run: swift test
       - name: Select an available iPhone simulator
@@ -16,4 +16,18 @@ jobs:
           DEVICE_ID=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for group in d["devices"].values() for x in group if x["name"].startswith("iPhone")))')
           echo "SIMULATOR_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Build and test SwiftUI app on iPhone simulator
-        run: xcodebuild test -project Commons.xcodeproj -scheme Commons -destination "platform=iOS Simulator,id=$SIMULATOR_ID" CODE_SIGNING_ALLOWED=NO
+        run: |
+          mkdir -p build
+          set -o pipefail
+          xcodebuild test -project Commons.xcodeproj -scheme Commons -destination "platform=iOS Simulator,id=$SIMULATOR_ID" -resultBundlePath build/Commons.xcresult CODE_SIGNING_ALLOWED=NO | tee build/xcodebuild.log
+      - name: Capture simulator screenshot for Windows review
+        if: success()
+        run: |
+          xcrun simctl launch "$SIMULATOR_ID" com.example.msoecommons --ui-testing
+          sleep 3
+          xcrun simctl io "$SIMULATOR_ID" screenshot build/iphone-preview.png
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: iphone-test-results
+          path: build/
