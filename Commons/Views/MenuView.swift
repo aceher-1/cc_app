@@ -224,7 +224,7 @@ struct MenuView: View {
                     .background(CommonsTheme.card, in: RoundedRectangle(cornerRadius: 16))
             }
             if store.isLoading {
-                HStack { ProgressView(); Text(store.currentMenu == nil ? "Loading the menuâ€¦" : "Refreshing todayâ€™s cacheâ€¦") }
+                HStack { ProgressView(); Text(store.currentMenu == nil ? "Loading the menu…" : "Refreshing today’s cache…") }
                     .font(.subheadline).foregroundStyle(.secondary)
             }
             if let menu = store.currentMenu {
@@ -243,7 +243,7 @@ struct MenuView: View {
                         }
                     }
                     if store.preferences.halalPotentiallySuitable {
-                        Label("Potentially suitable â€¢ not halal certified", systemImage: "info.circle")
+                        Label("Potentially suitable • not halal certified", systemImage: "info.circle")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     ForEach(store.visibleStations) { station in stationCard(station) }
@@ -303,7 +303,7 @@ struct MenuView: View {
     private var footer: some View {
         VStack(alignment: .leading, spacing: 10) {
             if let menu = store.currentMenu {
-                Label("Updated \(DiningDay.label(menu.fetchedAt, format: "MMM d, h:mm a")) Â· Milwaukee time", systemImage: "clock")
+                Label("Updated \(DiningDay.label(menu.fetchedAt, format: "MMM d, h:mm a")) · Milwaukee time", systemImage: "clock")
                     .font(.caption).foregroundStyle(.secondary)
                 if !DiningDay.isSourceFresh(menu, now: Date()) {
                     Text("Saved menu from an earlier day. It may have changed.").font(.caption).foregroundStyle(.secondary)
@@ -311,7 +311,7 @@ struct MenuView: View {
             }
             Text("Diet and allergen labels come from Sodexo. Shared equipment and ingredient changes can affect suitability; confirm with dining staff.")
                 .font(.caption).foregroundStyle(.secondary)
-            Link(destination: SharedMenuService.sourceURL) { Label("View Sodexoâ€™s original menu", systemImage: "arrow.up.right.square") }
+            Link(destination: SharedMenuService.sourceURL) { Label("View Sodexo’s original menu", systemImage: "arrow.up.right.square") }
                 .font(.subheadline.weight(.medium))
         }.padding(.horizontal, 24)
     }
