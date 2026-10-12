@@ -17,6 +17,8 @@ GitHub builds the release app on a cloud Mac. You download the unsigned device I
 9. Enable **Settings → Privacy & Security → Developer Mode**. Allow the restart, unlock the phone, confirm **Turn On**, and enter your passcode if prompted. If Developer Mode is initially absent, attempt the developer-app installation first and recheck Settings. Apple documents that the setting appears after initiating development pairing/installation.
 10. Open **Commons** on your Home Screen with an internet connection. It downloads the published daily menu; set your dietary filters once. They save on your phone.
 
+Version 1.1 adds **Organize** beside the meal heading, collapsible station headers, clearer meal selection, left/right meal swipes, and the **MSOE ↻** refresh button. To update from an earlier build, download the newest IPA and repeat the installation with the same Apple Account and bundle identifier, overwriting the existing app to keep preferences.
+
 With a free Apple Account, signing expires after **seven days**. Sideloadly's automatic refresh needs the PC running and the phone reachable over USB or configured Wi-Fi sync. For Wi-Fi: in iTunes, select the connected phone, open **Summary → Options**, enable **Sync with this iPhone over Wi-Fi**, and apply/sync. Keep both devices on the same network. Alternatively, repeat the installation before expiry using the same Apple Account and bundle identifier, overwriting the app. Do not delete Commons to refresh it: deletion removes its saved preferences/cache.
 
 Signing refresh and menu refresh are separate. You do not rebuild or reinstall the app for each day's menu. The central publisher updates the shared feed once daily; Commons downloads that data when used.

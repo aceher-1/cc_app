@@ -4,6 +4,7 @@ import Combine
 @MainActor
 final class MenuStore: ObservableObject {
     @Published var preferences: DietaryPreferences { didSet { preferenceStorage.save(preferences) } }
+    @Published var layout: MenuLayoutPreferences { didSet { layoutStorage.save(layout) } }
     @Published var selectedDateKey: String
     @Published var selectedMealName = ""
     @Published var searchText = ""
@@ -12,6 +13,7 @@ final class MenuStore: ObservableObject {
     @Published private(set) var messages: [String: String] = [:]
     @Published private(set) var dates = DiningDay.dates()
     private let preferenceStorage: PreferenceStorage
+    private let layoutStorage: MenuLayoutStorage
     private let cache: DailyCache
     private let service: any MenuFetching
     private let defaults: UserDefaults
@@ -22,7 +24,9 @@ final class MenuStore: ObservableObject {
         self.cache = cache
         self.defaults = defaults
         preferenceStorage = PreferenceStorage(defaults: defaults)
+        layoutStorage = MenuLayoutStorage(defaults: defaults)
         preferences = preferenceStorage.load()
+        layout = layoutStorage.load()
         let today = DiningDay.key(for: Date())
         selectedDateKey = today
         lastTodayKey = today
@@ -48,15 +52,41 @@ final class MenuStore: ObservableObject {
     }
     var visibleStations: [MenuStation] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        return (currentMeal?.stations ?? []).compactMap { station in
+        let matching: [MenuStation] = (currentMeal?.stations ?? []).compactMap { station in
             let items = station.items.filter { item in
                 preferences.includes(item) && (query.isEmpty || item.name.localizedCaseInsensitiveContains(query)
                     || item.description.localizedCaseInsensitiveContains(query) || station.name.localizedCaseInsensitiveContains(query))
             }
             return items.isEmpty ? nil : MenuStation(id: station.id, name: station.name, items: items)
         }
+        return layout.ordered(matching)
     }
     var visibleCount: Int { visibleStations.reduce(0) { $0 + $1.items.count } }
+
+    var currentMealIndex: Int? {
+        guard let meal = currentMeal else { return nil }
+        return currentMenu?.meals.firstIndex(where: { $0.id == meal.id })
+    }
+    var sectionNames: [String] {
+        var seen: Set<String> = []
+        return layout.ordered(currentMeal?.stations ?? []).compactMap { station in
+            seen.insert(MenuLayoutPreferences.key(for: station.name)).inserted ? station.name : nil
+        }
+    }
+    @discardableResult func selectMeal(named name: String) -> Bool {
+        guard currentMenu?.meals.contains(where: { $0.name == name }) == true else { return false }
+        selectedMealName = name
+        return true
+    }
+    @discardableResult func selectAdjacentMeal(_ direction: Int) -> Bool {
+        guard direction == -1 || direction == 1, let index = currentMealIndex,
+              let meals = currentMenu?.meals, meals.indices.contains(index + direction) else { return false }
+        selectedMealName = meals[index + direction].name
+        return true
+    }
+    func moveSections(from offsets: IndexSet, to destination: Int) {
+        layout.moveSections(sectionNames, from: offsets, to: destination)
+    }
 
     func foreground(now: Date = Date()) async {
         let today = DiningDay.key(for: now)

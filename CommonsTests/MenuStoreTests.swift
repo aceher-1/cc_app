@@ -5,17 +5,51 @@ private actor StubMenuService: MenuFetching {
     private(set) var calls = 0
     var fail = false
     private var publicationTime: Date?
+    private var meals: [MenuMeal] = []
     func setFail(_ value: Bool) { fail = value }
     func setPublicationTime(_ value: Date) { publicationTime = value }
+    func setMeals(_ value: [MenuMeal]) { meals = value }
     func fetch(dateKey: String, now: Date) async throws -> DayMenu {
         calls += 1
         if fail { throw URLError(.notConnectedToInternet) }
-        return DayMenu(dateKey: dateKey, fetchedAt: publicationTime ?? now, meals: [], checkedAt: now)
+        return DayMenu(dateKey: dateKey, fetchedAt: publicationTime ?? now, meals: meals, checkedAt: now)
     }
 }
 
 @MainActor
 final class MenuStoreTests: XCTestCase {
+    func testMealNavigationAndSavedSectionLayoutDoNotFetchAgain() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let suite = "CommonsNavigationTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { try? FileManager.default.removeItem(at: directory); defaults.removePersistentDomain(forName: suite) }
+        let day = DiningDay.key(for: Date())
+        let mealData = Data(#"[{"name":"Breakfast","groups":[]},{"name":"Lunch","groups":[{"name":"Grill","items":[{"name":"Sample rice"}]},{"name":"Salad","items":[{"name":"Sample greens"}]}]},{"name":"Dinner","groups":[]}]"#.utf8)
+        let meals = try MenuParser.parse(mealData, dateKey: day, fetchedAt: Date()).meals
+        let service = StubMenuService()
+        await service.setMeals(meals)
+        let cache = DailyCache(directory: directory)
+        let store = MenuStore(service: service, cache: cache, defaults: defaults)
+        await store.load()
+        XCTAssertTrue(store.selectMeal(named: "Breakfast"))
+        XCTAssertFalse(store.selectAdjacentMeal(-1))
+        XCTAssertTrue(store.selectAdjacentMeal(1))
+        XCTAssertEqual(store.currentMeal?.name, "Lunch")
+        store.moveSections(from: IndexSet(integer: 1), to: 0)
+        store.layout.setCollapsed(true, for: "Grill")
+        XCTAssertEqual(store.visibleStations.map(\.name), ["Salad", "Grill"])
+        XCTAssertEqual(store.visibleCount, 2, "Collapsing changes presentation, not dietary filtering.")
+        XCTAssertTrue(store.selectAdjacentMeal(1))
+        XCTAssertFalse(store.selectAdjacentMeal(1))
+        XCTAssertFalse(store.selectMeal(named: "Unavailable meal"))
+        let restarted = MenuStore(service: service, cache: cache, defaults: defaults)
+        XCTAssertTrue(restarted.selectMeal(named: "Lunch"))
+        XCTAssertEqual(restarted.visibleStations.map(\.name), ["Salad", "Grill"])
+        XCTAssertTrue(restarted.layout.isCollapsed("Grill"))
+        let calls = await service.calls
+        XCTAssertEqual(calls, 1)
+    }
+
     func testEarlyOpeningRetriesStalePublicationHourlyThenReusesFreshData() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let suite = "CommonsPublicationTests.\(UUID().uuidString)"

@@ -2,6 +2,14 @@
 
 A SwiftUI iPhone app for the [MSOE Robert Spitzer Dining Commons menu](https://msoedining.sodexomyway.com/en-us/locations/the-dining-commons). Red/black styling, date and meal navigation, station cards, search, ingredients, nutrition, and locally saved dietary preferences.
 
+## Personalize the menu
+
+- Tap **Organize** beside the current meal name to drag station sections into your preferred order. Switches collapse or expand their dishes; the section headers and matching-dish counts remain visible. Expand/collapse all applies to the listed meal's sections, and **Reset section layout** restores provider order and expands every section.
+- Tap any station header to collapse or expand it directly. Layout choices save locally, independently of dietary filters, and follow matching station names across dates and meals. Newly encountered stations appear after saved sections in their original source order. Duplicate station names share layout choices and keep their relative source order.
+- The selected meal has a red pill, a checkmark, and an explicit meal heading. Buttons have press feedback, transitions, and a light selection haptic. The page background changes subtly with the selected meal. Reduce Motion turns off the movement animations.
+- Swipe left/right across the menu to move to the next/previous available meal. Swipes stop at the first and last meal. Vertical scrolling, station taps, dish navigation, and the separate horizontal date/meal strips remain available.
+- Tap **MSOE ↻** in the top corner, or pull down, to check the latest shared snapshot for the selected date. The button shows progress, and successful checks display a confirmation. This refresh downloads published JSON; the daily central job still handles upstream Sodexo updates.
+
 ## Shared daily menu service
 
 ```text
