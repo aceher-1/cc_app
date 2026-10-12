@@ -84,7 +84,7 @@ struct MenuView: View {
     }
 
     private func selectAdjacentMeal(_ direction: Int) {
-        withAnimation(mealAnimation) { store.selectAdjacentMeal(direction) }
+        withAnimation(mealAnimation) { _ = store.selectAdjacentMeal(direction) }
     }
 
     private var header: some View {
@@ -143,44 +143,13 @@ struct MenuView: View {
         if let menu = store.currentMenu, !menu.meals.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 ScrollViewReader { proxy in
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 10) {
-                            ForEach(menu.meals) { meal in
-                                let selected = store.currentMeal?.id == meal.id
-                                Button {
-                                    withAnimation(mealAnimation) { store.selectMeal(named: meal.name) }
-                                } label: {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "checkmark.circle.fill").opacity(selected ? 1 : 0)
-                                            .accessibilityHidden(true)
-                                        Text(meal.name)
-                                    }
-                                    .font(.subheadline.weight(.semibold))
-                                    .padding(.horizontal, 16).frame(minHeight: 46)
-                                    .foregroundStyle(selected ? Color.white : Color.primary)
-                                    .background {
-                                        if selected {
-                                            Capsule().fill(CommonsTheme.red)
-                                                .matchedGeometryEffect(id: "selectedMeal", in: mealSelection)
-                                        } else { Capsule().fill(CommonsTheme.card) }
-                                    }
-                                    .overlay { Capsule().strokeBorder(selected ? CommonsTheme.red : Color.secondary.opacity(0.15)) }
-                                }
-                                .buttonStyle(MealButtonStyle())
-                                .id(meal.id)
-                                .accessibilityLabel(meal.name)
-                                .accessibilityValue(selected ? "Selected" : "Not selected")
-                                .accessibilityAddTraits(selected ? .isSelected : [])
-                                .accessibilityIdentifier("meal.\(meal.name)")
-                            }
-                        }.padding(.horizontal, 20)
-                    }
-                    .onChange(of: store.currentMeal?.id) { _, id in
-                        if let id { withAnimation(mealAnimation) { proxy.scrollTo(id, anchor: .center) } }
-                    }
-                    .onAppear {
-                        if let id = store.currentMeal?.id { proxy.scrollTo(id, anchor: .center) }
-                    }
+                    mealTabs(menu)
+                        .onChange(of: store.currentMeal?.id) { _, id in
+                            if let id { withAnimation(mealAnimation) { proxy.scrollTo(id, anchor: .center) } }
+                        }
+                        .onAppear {
+                            if let id = store.currentMeal?.id { proxy.scrollTo(id, anchor: .center) }
+                        }
                 }
                 if menu.meals.count > 1 {
                     Label("Swipe the menu to change meals", systemImage: "arrow.left.and.right")
@@ -188,6 +157,43 @@ struct MenuView: View {
                 }
             }
         }
+    }
+
+    private func mealTabs(_ menu: DayMenu) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(menu.meals) { meal in mealButton(meal) }
+            }.padding(.horizontal, 20)
+        }
+    }
+
+    private func mealButton(_ meal: MenuMeal) -> some View {
+        let selected = store.currentMeal?.id == meal.id
+        return Button {
+            withAnimation(mealAnimation) { _ = store.selectMeal(named: meal.name) }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "checkmark.circle.fill").opacity(selected ? 1 : 0)
+                    .accessibilityHidden(true)
+                Text(meal.name)
+            }
+            .font(.subheadline.weight(.semibold))
+            .padding(.horizontal, 16).frame(minHeight: 46)
+            .foregroundStyle(selected ? Color.white : Color.primary)
+            .background {
+                if selected {
+                    Capsule().fill(CommonsTheme.red)
+                        .matchedGeometryEffect(id: "selectedMeal", in: mealSelection)
+                } else { Capsule().fill(CommonsTheme.card) }
+            }
+            .overlay { Capsule().strokeBorder(selected ? CommonsTheme.red : Color.secondary.opacity(0.15)) }
+        }
+        .buttonStyle(MealButtonStyle())
+        .id(meal.id)
+        .accessibilityLabel(meal.name)
+        .accessibilityValue(selected ? "Selected" : "Not selected")
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("meal.\(meal.name)")
     }
 
     @ViewBuilder private var menuContent: some View {
@@ -218,7 +224,7 @@ struct MenuView: View {
                     .background(CommonsTheme.card, in: RoundedRectangle(cornerRadius: 16))
             }
             if store.isLoading {
-                HStack { ProgressView(); Text(store.currentMenu == nil ? "Loading the menu…" : "Refreshing today’s cache…") }
+                HStack { ProgressView(); Text(store.currentMenu == nil ? "Loading the menuâ€¦" : "Refreshing todayâ€™s cacheâ€¦") }
                     .font(.subheadline).foregroundStyle(.secondary)
             }
             if let menu = store.currentMenu {
@@ -237,7 +243,7 @@ struct MenuView: View {
                         }
                     }
                     if store.preferences.halalPotentiallySuitable {
-                        Label("Potentially suitable • not halal certified", systemImage: "info.circle")
+                        Label("Potentially suitable â€¢ not halal certified", systemImage: "info.circle")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     ForEach(store.visibleStations) { station in stationCard(station) }
@@ -297,7 +303,7 @@ struct MenuView: View {
     private var footer: some View {
         VStack(alignment: .leading, spacing: 10) {
             if let menu = store.currentMenu {
-                Label("Updated \(DiningDay.label(menu.fetchedAt, format: "MMM d, h:mm a")) · Milwaukee time", systemImage: "clock")
+                Label("Updated \(DiningDay.label(menu.fetchedAt, format: "MMM d, h:mm a")) Â· Milwaukee time", systemImage: "clock")
                     .font(.caption).foregroundStyle(.secondary)
                 if !DiningDay.isSourceFresh(menu, now: Date()) {
                     Text("Saved menu from an earlier day. It may have changed.").font(.caption).foregroundStyle(.secondary)
@@ -305,7 +311,7 @@ struct MenuView: View {
             }
             Text("Diet and allergen labels come from Sodexo. Shared equipment and ingredient changes can affect suitability; confirm with dining staff.")
                 .font(.caption).foregroundStyle(.secondary)
-            Link(destination: SharedMenuService.sourceURL) { Label("View Sodexo’s original menu", systemImage: "arrow.up.right.square") }
+            Link(destination: SharedMenuService.sourceURL) { Label("View Sodexoâ€™s original menu", systemImage: "arrow.up.right.square") }
                 .font(.subheadline.weight(.medium))
         }.padding(.horizontal, 24)
     }
