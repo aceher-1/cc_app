@@ -19,3 +19,11 @@ Verified October 11, 2026, using Windows locally and GitHub's macOS runner.
 The earlier [iOS checks run #3](https://github.com/aceher-1/cc_app/actions/runs/38172039296) passed its app build and tests. It failed only in the post-test screenshot helper: `simctl launch` reported `Unable to lookup in current state: Shutdown` and exited 149. Xcode's test runner used a simulator clone while the helper targeted the original, shut-down simulator. Run #4 removed that helper and exports screenshots already captured by XCTest; its complete workflow passed.
 
 The two final wording edits (singular “dish” and shared-service error wording) were syntax checked after the native workflow; they do not change app behavior. The documentation/wording commit skips duplicate CI. Windows itself has no Xcode or native iOS simulator; the native checks above ran on a cloud Mac. The screenshot fixtures are synthetic and explicitly named as samples; normal and release launches use the published live feed.
+
+## Version 1.1 customization
+
+Verified October 12, 2026.
+
+- Local checks confirmed every app/test source is included in the regenerated project, all project object references resolve, the shared scheme and privacy manifest parse, assets are valid JSON, and version metadata is 1.1 (build 2).
+- The three central-publisher tests still pass locally on Windows.
+- The [version 1.1 device build](https://github.com/aceher-1/cc_app/actions/runs/38288989325) passed for commit `8539f82`. After downloading its `commons-iphone-ipa` artifact, independent checks verified the SHA-256 checksum, iPhoneOS platform, minimum iOS 17.0, ARM64 executable, version 1.1/build 2, and absence of the sample-oatmeal fixture string in the release executable. Local signing and physical-phone launch still require the user's device.

@@ -91,7 +91,10 @@ final class CommonsUITests: XCTestCase {
         let handles = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Reorder"))
         XCTAssertEqual(handles.count, 2, app.debugDescription)
         guard handles.count == 2 else { return }
-        handles.element(boundBy: 1).press(forDuration: 0.8, thenDragTo: handles.element(boundBy: 0))
+        // Cross the destination row's midpoint and allow the native list to settle before release.
+        let start = handles.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let destination = handles.element(boundBy: 0).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0))
+        start.press(forDuration: 0.8, thenDragTo: destination, withVelocity: .slow, thenHoldForDuration: 0.5)
         let salad = app.switches["layout.expanded.Test salad bar"]
         let station = app.switches["layout.expanded.Test station"]
         XCTAssertLessThan(salad.frame.minY, station.frame.minY)
