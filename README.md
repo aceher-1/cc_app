@@ -102,4 +102,4 @@ Your dietary and section choices are saved on your phone and are not sent with m
 
 See the [developer guide](DEVELOPMENT.md) for code, testing, and menu-update details, or the [verification notes](CHECKS.md) for completed checks.
 
-Commons is an independent student project, not an official MSOE or Sodexo app.
+[this app is not endorsed by, directly affiliated with, maintained, authorized, or sponsored by MSOE or any MSOE partner/subsidiary](NON_AFFILIATION_STATEMENT.md)
