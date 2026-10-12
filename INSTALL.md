@@ -1,41 +1,82 @@
 # Install Commons on your iPhone
 
-Commons supports iPhone running iOS 17 or later, including iPhone 15 on iOS 26.2. It is currently a development app, with no App Store listing or TestFlight invitation.
+## Before you start
 
-## From Windows
+Commons works on an **iPhone running iOS 17 or later**, including iPhone 15 on iOS 26.2. Check your version in **Settings > General > About**.
 
-GitHub builds the release app on a cloud Mac. You download the unsigned device IPA and sign/install it locally with your own Apple Account using Sideloadly. This does not require jailbreaking or a paid developer membership. Sideloadly documents support for iOS 26+, but installation and signing on your physical phone still need to be verified there.
+You will need:
 
-1. Sign in to GitHub on your Windows PC. Open [Build iPhone IPA](https://github.com/aceher-1/cc_app/actions/workflows/device-build.yml).
-2. Open the newest successful run. Under **Artifacts**, download **commons-iphone-ipa**. Extract the ZIP in File Explorer. The file you will install is **Commons-unsigned.ipa**, not the ZIP and not the simulator test artifact.
-3. If no artifact is available, choose **Run workflow**, select **codex/initial-app**, and run it. Wait for the green check, then return to step 2. Artifacts are kept for 30 days.
-4. Install the Windows version of [Sideloadly from sideloadly.io](https://sideloadly.io/). Follow its Windows prerequisites for the Apple website versions of iTunes and iCloud; the provider warns against their Microsoft Store versions. Use the links on that official page.
-5. Connect the iPhone 15 to the PC with a USB-C data cable. Unlock it, tap **Trust** on **Trust This Computer?**, and enter your phone passcode. Check that iTunes recognizes the phone.
-6. Open Sideloadly. Select your iPhone from its device list, drag **Commons-unsigned.ipa** into the app/IPA area, and enter your Apple Account email. Keep normal Apple Account signing and the default app options. If offered, enable automatic refresh.
-7. Click **Start**. Enter your Apple Account password and verification code in Sideloadly's local prompts if requested. No Apple password or signing certificate needs to be added to this GitHub repository. Wait for installation to finish.
-8. On the phone, open **Settings → General → VPN & Device Management**. Under **Developer App**, select the Apple Account used to install Commons and trust it. Follow any verification or restart prompts. If that entry is absent, finish installation first.
-9. Enable **Settings → Privacy & Security → Developer Mode**. Allow the restart, unlock the phone, confirm **Turn On**, and enter your passcode if prompted. If Developer Mode is initially absent, attempt the developer-app installation first and recheck Settings. Apple documents that the setting appears after initiating development pairing/installation.
-10. Open **Commons** on your Home Screen with an internet connection. It downloads the published daily menu; set your dietary filters once. They save on your phone.
+- A Windows PC or Mac with an internet connection.
+- Your iPhone and a USB cable that can transfer data.
+- Your Apple Account: the email and password you use for the App Store.
+- A free [GitHub account](https://github.com/signup) to download the app.
 
-Version 1.1 adds **Organize** beside the meal heading, collapsible station headers, clearer meal selection, left/right meal swipes, and the **MSOE ↻** refresh button. To update from an earlier build, download the newest IPA and repeat the installation with the same Apple Account and bundle identifier, overwriting the existing app to keep preferences.
+**Commons is not available in the App Store yet.** You install it using a free computer app called Sideloadly. With a free Apple Account, the installation needs to be renewed every **seven days**. This guide explains how. Commons itself has no login.
 
-With a free Apple Account, signing expires after **seven days**. Sideloadly's automatic refresh needs the PC running and the phone reachable over USB or configured Wi-Fi sync. For Wi-Fi: in iTunes, select the connected phone, open **Summary → Options**, enable **Sync with this iPhone over Wi-Fi**, and apply/sync. Keep both devices on the same network. Alternatively, repeat the installation before expiry using the same Apple Account and bundle identifier, overwriting the app. Do not delete Commons to refresh it: deletion removes its saved preferences/cache.
+## Install Commons on your iPhone
 
-Signing refresh and menu refresh are separate. You do not rebuild or reinstall the app for each day's menu. The central publisher updates the shared feed once daily; Commons downloads that data when used.
+### 1. Download Commons onto your computer
 
-If no device appears in Sideloadly, check cable/data support, unlock/trust the phone, and verify iTunes sees it. If an installation fails, retain the exact Sideloadly error. A successful IPA build proves device compilation and packaging; it cannot prove Apple Account provisioning or successful launch on your phone.
+1. Sign in to GitHub, then open the [Commons download page](https://github.com/aceher-1/cc_app/actions/workflows/device-build.yml).
+2. Click the most recent entry with a **green check mark**.
+3. Scroll to **Artifacts**. This is GitHub's name for the download area. Click **commons-iphone-ipa**.
+4. Open the downloaded ZIP file. On Windows, right-click it and choose **Extract All**. On a Mac, double-click it.
+5. Find **Commons-unsigned.ipa** in the extracted folder. Keep it handy for step 3.
 
-Sources: [Sideloadly setup and downloads](https://sideloadly.io/), [Sideloadly FAQ: signing, trust, refresh](https://sideloadly.io/faq.html), [Apple: Developer Mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device), [Apple: free Personal Team limits](https://developer.apple.com/help/account/basics/about-your-developer-account/).
+If you cannot find the download, check that you are signed in and viewing the entry's **Summary** page. Downloads expire after 30 days; if none are available, [ask for a fresh download](https://github.com/aceher-1/cc_app/issues).
 
-## With access to a Mac
+### 2. Install Sideloadly on your computer
 
-1. Install **Xcode 26.2 or a newer compatible stable Xcode**. Xcode 26.2 includes the iOS 26.2 SDK and requires macOS Sequoia 15.6 or later. See [Apple's Xcode 26.2 release notes](https://developer.apple.com/documentation/xcode-release-notes/xcode-26_2-release-notes).
-2. Download/clone [this repository](https://github.com/aceher-1/cc_app) and open **Commons.xcodeproj** in Xcode.
-3. In **Xcode → Settings → Accounts**, add your Apple Account.
-4. Select the blue **Commons** project in the navigator, then the **Commons** app target. In **Signing & Capabilities**, keep **Automatically manage signing** enabled and select your team (a free account appears as **Personal Team**). Change the bundle identifier to a unique value, for example `com.aceher.commons.personal`.
-5. Connect/unlock the iPhone, trust the Mac, and select the physical iPhone as the destination beside the **Commons** scheme. Wait for pairing/device preparation to finish.
-6. Enable Developer Mode as described above, including the restart and confirmation.
-7. Choose **Product → Run** (Command-R). Xcode builds, signs, and installs Commons. Follow any trust prompts on the phone.
-8. Open Commons. With a free Personal Team, repeat Run to renew provisioning every seven days; reinstall over the existing app to retain preferences.
+1. Open [sideloadly.io](https://sideloadly.io/) and choose the download for Windows or Mac.
+2. Install Sideloadly and follow its setup instructions.
+3. **On Windows:** use the iTunes and iCloud download links on that page. Sideloadly requires those versions rather than the Microsoft Store versions; follow its instructions if you need to replace an existing installation.
 
-For simple installation by friends or classmates, a future TestFlight release would require Apple Developer Program membership and a signed App Store Connect upload. TestFlight distribution is not configured in this repository yet.
+### 3. Put Commons on your phone
+
+1. Connect your iPhone to your computer with the USB cable and unlock it.
+2. If the phone asks **Trust This Computer?**, tap **Trust** and enter your phone passcode.
+3. Open Sideloadly. Choose your **iPhone** from its device list.
+4. Drag **Commons-unsigned.ipa** into Sideloadly's app-file box.
+5. Enter your **Apple Account email**, leave the other options at their defaults, and click **Start**.
+6. Enter your Apple Account password and verification code in Sideloadly's prompts if asked. Wait until installation finishes.
+
+### 4. Allow Commons to open
+
+1. On your iPhone, go to **Settings > General > VPN & Device Management**.
+2. Under **Developer App**, tap the Apple Account you used, then **Trust** it. Follow any verification or restart prompts.
+3. Go to **Settings > Privacy & Security > Developer Mode** and turn it on. This lets your phone open apps installed this way.
+4. Allow the restart. After the phone restarts, unlock it, confirm **Turn On**, and enter your passcode if asked.
+5. Open **Commons** from your Home Screen while connected to the internet.
+
+If Developer Mode is missing, finish the Sideloadly installation, try opening Commons, and check Settings again.
+
+For installer help, see [Sideloadly's instructions](https://sideloadly.io/faq.html). GitHub also explains [where to find downloads](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/download-workflow-artifacts).
+
+## Keep the app working
+
+With a free Apple Account, Commons needs its installation renewed every **seven days**. Otherwise, it may stop opening. This is an [Apple limit](https://developer.apple.com/help/account/basics/about-your-developer-account/).
+
+Connect your phone to your computer and enable **automatic refresh** in Sideloadly. Leave Sideloadly running with the phone connected so it can renew the app. You can also set up renewal over Wi-Fi using the [Sideloadly setup guide](https://sideloadly.io/faq.html).
+
+If the app has already stopped opening, repeat step 3 with the same Apple Account and the same Sideloadly options. Install over the existing copy. **Do not delete Commons first**: deleting it removes your saved choices.
+
+Daily menu updates happen separately. You do not need to reinstall Commons to get the next day's menu.
+
+## Get a newer version of Commons
+
+Download the newest app file from the same download page, then repeat step 3. Use the same Apple Account and installer options to keep your saved dietary and section choices.
+
+## Having trouble?
+
+| What you see | What to try |
+| --- | --- |
+| Sideloadly cannot find your phone | Unlock it, check the cable, and accept the Trust prompt. On Windows, check that iTunes sees it; on Mac, check Finder. |
+| An untrusted-developer or Developer Mode message | Follow step 4 above. |
+| Commons stopped opening after about a week | Renew the installation using Sideloadly. |
+| No menu, or an older menu | Check your internet connection and tap **MSOE** with the refresh arrow. If it is still unavailable, open the original menu link inside Commons. |
+| No dishes match | Check the selected date, meal, search, and dietary filters. |
+
+Still stuck? [Ask for help](https://github.com/aceher-1/cc_app/issues) and include the exact error message, your iOS version, and whether you use Windows or Mac.
+
+
+For the app controls, visit https://github.com/aceher-1/cc_app#using-commons

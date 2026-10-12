@@ -1,91 +1,105 @@
 # Commons
 
-A SwiftUI iPhone app for the [MSOE Robert Spitzer Dining Commons menu](https://msoedining.sodexomyway.com/en-us/locations/the-dining-commons). Red/black styling, date and meal navigation, station cards, search, ingredients, nutrition, and locally saved dietary preferences.
+See what's being served at the **MSOE Robert Spitzer Dining Commons**. Browse meals, search dishes, save dietary choices, and arrange the menu the way you like it.
 
-## Personalize the menu
+[Install the app](#install-commons-on-your-iphone) · [Learn the controls](#using-commons) · [Get help](#having-trouble)
 
-- Tap **Organize** beside the current meal name to drag station sections into your preferred order. Switches collapse or expand their dishes; the section headers and matching-dish counts remain visible. Expand/collapse all applies to the listed meal's sections, and **Reset section layout** restores provider order and expands every section.
-- Tap any station header to collapse or expand it directly. Layout choices save locally, independently of dietary filters, and follow matching station names across dates and meals. Newly encountered stations appear after saved sections in their original source order. Duplicate station names share layout choices and keep their relative source order.
-- The selected meal has a red pill, a checkmark, and an explicit meal heading. Buttons have press feedback, transitions, and a light selection haptic. The page background changes subtly with the selected meal. Reduce Motion turns off the new meal and collapse animations.
-- Swipe left/right across the menu to move to the next/previous available meal. Swipes stop at the first and last meal. Vertical scrolling, station taps, dish navigation, and the separate horizontal date/meal strips remain available.
-- Tap **MSOE ↻** in the top corner, or pull down, to check the latest shared snapshot for the selected date. The button shows progress, and successful checks display a confirmation. This refresh downloads published JSON; the daily central job still handles upstream Sodexo updates.
+## Before you start
 
-## Shared daily menu service
+Commons works on an **iPhone running iOS 17 or later**, including iPhone 15 on iOS 26.2. Check your version in **Settings > General > About**.
 
-```text
-Sodexo menu widget
-    ↓ one scheduled publisher, daily
-GitHub Actions → validated JSON → GitHub Pages
-                                    ↓
-                         all iPhones → offline cache
-```
+You will need:
 
-The `Publish daily menus` workflow runs at **4:23 a.m. America/Chicago** and supports manual runs from GitHub's Actions tab. It discovers the public widget configuration once, retrieves yesterday through the next 14 days, validates every response, and publishes 16 date snapshots together. If a request or validation fails, deployment stops and the previous successful publication remains available.
+- A Windows PC or Mac with an internet connection.
+- Your iPhone and a USB cable that can transfer data.
+- Your Apple Account: the email and password you use for the App Store.
+- A free [GitHub account](https://github.com/signup) to download the app.
 
-The phones download an already-built JSON file; they do not access Sodexo for menu updates. No API key is included in the app or published snapshots. Source discovery uses only the website's public widget client key, in memory, on the publisher. Private authentication configuration is not extracted or used.
+**Commons is not available in the App Store yet.** You install it using a free computer app called Sideloadly. With a free Apple Account, the installation needs to be renewed every **seven days**. This guide explains how. Commons itself has no login.
 
-- Shared feed: `https://aceher-1.github.io/cc_app/api/YYYY-MM-DD.json`
-- Publication metadata: [manifest.json](https://aceher-1.github.io/cc_app/manifest.json)
-- One file contains every meal and station for that date. Searching, changing meals, and filtering use local data.
-- Each iPhone downloads requested dates once per Chicago calendar day, persists them across restarts, and retains cached data offline. Pull-to-refresh checks the shared service again; it does not trigger an upstream scrape.
-- The app displays the publisher's actual update timestamp, separately from the device's download time. If opened before the daily publication, it preserves the stale snapshot and retries at most hourly while active until today's snapshot appears. Failed requests retry at most once per five minutes; manual refresh bypasses the throttle.
-- Midnight/foreground checks roll over the selected day. Previously requested dates remain available offline; caches older than 30 days are pruned. An unavailable date never substitutes another date's menu.
-- Preferences stay on the iPhone; they are not sent to the service.
+## Install Commons on your iPhone
 
-GitHub Pages is static hosting, so it needs no running database or application server. GitHub scheduled jobs can be delayed or dropped under load, and public-repository schedules are disabled after 60 days without repository activity. Check Actions periodically and re-enable the schedule if necessary. For unattended production reliability, the same publisher can run on a dedicated scheduler/object-storage service; change `SharedMenuService.defaultBaseURL` to the new host. See [GitHub schedule behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule).
+### 1. Download Commons onto your computer
 
-Sodexo's widget/feed is undocumented and can change. Source changes produce errors rather than invented dishes. Menu content and labels belong to the provider.
+1. Sign in to GitHub, then open the [Commons download page](https://github.com/aceher-1/cc_app/actions/workflows/device-build.yml).
+2. Click the most recent entry with a **green check mark**.
+3. Scroll to **Artifacts**. This is GitHub's name for the download area. Click **commons-iphone-ipa**.
+4. Open the downloaded ZIP file. On Windows, right-click it and choose **Extract All**. On a Mac, double-click it.
+5. Find **Commons-unsigned.ipa** in the extracted folder. Keep it handy for step 3.
 
-## Run on iPhone
+If you cannot find the download, check that you are signed in and viewing the entry's **Summary** page. Downloads expire after 30 days; if none are available, [ask for a fresh download](https://github.com/aceher-1/cc_app/issues).
 
-See [INSTALL.md](INSTALL.md) for step-by-step **Windows-to-iPhone installation**, signing renewal, or direct installation from a Mac. The **Build iPhone IPA** manual workflow provides a release `arm64` device build; the unsigned IPA must be signed locally before an iPhone can run it. No Apple signing credentials are uploaded to GitHub.
+### 2. Install Sideloadly on your computer
 
-1. On a Mac, use an Xcode version that supports the phone's iOS version (for iOS 26.2, Xcode 26.2 or a newer compatible stable version), and open **Commons.xcodeproj**.
-2. Choose the **Commons** scheme and an installed iPhone simulator, then Run. Minimum iOS version: **17**.
-3. For a physical iPhone, choose your Apple development team under Signing & Capabilities and replace `com.example.msoecommons` with your own bundle identifier, then select your iPhone and Run.
+1. Open [sideloadly.io](https://sideloadly.io/) and choose the download for Windows or Mac.
+2. Install Sideloadly and follow its setup instructions.
+3. **On Windows:** use the iTunes and iCloud download links on that page. Sideloadly requires those versions rather than the Microsoft Store versions; follow its instructions if you need to replace an existing installation.
 
-The Xcode project, shared scheme, and original geometric icon are included. No third-party iOS dependencies or XcodeGen setup is required. `python tools/generate_project.py` regenerates the project if source files are added.
+### 3. Put Commons on your phone
 
-## Test from Windows
+1. Connect your iPhone to your computer with the USB cable and unlock it.
+2. If the phone asks **Trust This Computer?**, tap **Trust** and enter your phone passcode.
+3. Open Sideloadly. Choose your **iPhone** from its device list.
+4. Drag **Commons-unsigned.ipa** into Sideloadly's app-file box.
+5. Enter your **Apple Account email**, leave the other options at their defaults, and click **Start**.
+6. Enter your Apple Account password and verification code in Sideloadly's prompts if asked. Wait until installation finishes.
 
-Windows can run the publisher's deterministic tests and live source check with Python 3.9+:
+### 4. Allow Commons to open
 
-```powershell
-python -m unittest discover -s tools/tests -v
-python tools/check_source.py 2026-10-11
-python tools/refresh_menus.py --date 2026-10-11 --output _site
-```
+1. On your iPhone, go to **Settings > General > VPN & Device Management**.
+2. Under **Developer App**, tap the Apple Account you used, then **Trust** it. Follow any verification or restart prompts.
+3. Go to **Settings > Privacy & Security > Developer Mode** and turn it on. This lets your phone open apps installed this way.
+4. Allow the restart. After the phone restarts, unlock it, confirm **Turn On**, and enter your passcode if asked.
+5. Open **Commons** from your Home Screen while connected to the internet.
 
-Omit `--date` to use the current Chicago day when Python has timezone data installed. Windows Python installations without timezone data can pass the date explicitly or install `tzdata`.
+If Developer Mode is missing, finish the Sideloadly installation, try opening Commons, and check Settings again.
 
-The pure Foundation core is separated into a Swift package. After installing [Swift for Windows and its platform dependencies](https://www.swift.org/install/windows/), run `swift test` to exercise the actual parser, dietary logic, preferences, and cache. Windows cannot run the native SwiftUI iPhone UI or Apple's iOS Simulator; [Simulator ships with Xcode](https://help.apple.com/xcode/mac/current/en.lproj/devfd9e28378.html).
+For installer help, see [Sideloadly's instructions](https://sideloadly.io/faq.html). GitHub also explains [where to find downloads](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/download-workflow-artifacts).
 
-The **iOS checks** GitHub workflow builds and tests the native app on a macOS iPhone simulator. It includes a UI test that changes the halal filter and verifies it survives relaunch. Open the workflow run from Windows and download **iphone-test-results** to view `iphone-preview.png`, the other PNG screenshots in `screenshots/`, and the build log. Screenshots use explicitly labeled synthetic test dishes; release builds use the live shared service. Full `.xcresult` bundles can be inspected with Xcode on a Mac. The **Export native test screenshots** workflow also converts an existing run's results into Windows-readable images when supplied its run ID.
+## Keep the app working
 
-On macOS:
+With a free Apple Account, Commons needs its installation renewed every **seven days**. Otherwise, it may stop opening. This is an [Apple limit](https://developer.apple.com/help/account/basics/about-your-developer-account/).
 
-```sh
-swift test
-xcodebuild test -project Commons.xcodeproj -scheme Commons \
-  -destination 'platform=iOS Simulator,name=iPhone 16' CODE_SIGNING_ALLOWED=NO
-```
+Connect your phone to your computer and enable **automatic refresh** in Sideloadly. Leave Sideloadly running with the phone connected so it can renew the app. You can also set up renewal over Wi-Fi using the [Sideloadly setup guide](https://sideloadly.io/faq.html).
 
-Use an installed simulator name if different. Tests cover malformed source data, duplicate source IDs, missing/unknown allergens, filter intersections, halal screening, persistence, disk corruption, daily rollover, offline retention, retry throttling, and shared-feed date/timestamp checks.
+If the app has already stopped opening, repeat step 3 with the same Apple Account and the same Sideloadly options. Install over the existing copy. **Do not delete Commons first**: deleting it removes your saved choices.
 
-## Dietary logic
+Daily menu updates happen separately. You do not need to reinstall Commons to get the next day's menu.
 
-Filters save immediately and restore in the next session.
+## Get a newer version of Commons
 
-- All 12 Sodexo allergen exclusions: eggs, fish, gluten, milk, mustard, peanut, sesame, shellfish, soy, sulphites, tree nuts, wheat.
-- All four Sodexo diet labels: Mindful, Plant Based, Vegan, Vegetarian. Every selected label must be present; allergen exclusions and diet requirements combine.
-- Missing or unrecognized allergen data is hidden while allergen exclusions are active. “None listed” is not an allergen-free guarantee; shared equipment and substitutions need confirmation with dining staff.
+Download the newest app file from the same download page, then repeat step 3. Use the same Apple Account and installer options to keep your saved dietary and section choices.
 
-**Halal: potentially suitable** is a conservative ingredient screen, not certification. It requires ingredients and a provider vegetarian/vegan/plant-based label. It checks whole words in names, descriptions, and ingredients for pork, gelatin, animal rennet, and alcohol. Unverified meat, seafood, missing ingredients, and unlabeled dishes need confirmation. Wine/sherry/champagne vinegar names alone are not treated as beverage alcohol; alcohol-containing extracts are flagged. Imitation meats can be conservatively hidden when their wording includes meat terms.
+## Using Commons
 
-Dish details show the result and reason. Enzymes, flavorings, ingredient sources, slaughter, and preparation are unverified. No dish is displayed as “halal certified.” The rules are in `Commons/Core/HalalAssessment.swift`.
+- **Pick a date:** tap a day above the menu.
+- **Change meals:** tap Breakfast, Lunch, Dinner, or another available meal. The selected meal is red and has a checkmark. You can also swipe left or right across the menu.
+- **Find a dish:** use the search box. Tap a dish for its ingredients, listed allergens, and nutrition.
+- **Save dietary choices:** tap the sliders in the top-right corner. Choose the allergens to exclude, the diet labels you want, or the halal ingredient screen. Your choices are remembered next time. Selecting several diet labels requires a dish to match all of them.
+- **Arrange sections:** tap **Organize** next to the meal name, then drag the handles beside section names. Your order is remembered for matching sections on other days.
+- **Collapse a section:** tap its heading. In Organize, you can also expand or collapse all listed sections, or reset your layout.
+- **Check for a menu update:** tap **MSOE** with the refresh arrow in the top-left corner, or pull down on the menu. Menus update daily, and previously opened menus remain available without internet.
 
-## Layout
+**About dietary information:** labels and ingredients come from Sodexo and can be incomplete or change. Confirm allergens and preparation with dining staff. **Halal: potentially suitable** is an ingredient screen, not halal certification; it cannot verify ingredient sources or preparation.
 
-`Commons/Core`: models, parser, screening, preferences, dates, disk cache. `Commons/Services`: shared JSON client. `MenuStore.swift`: daily refresh coordination. `Commons/Views`: SwiftUI screens. `CommonsTests` and `CommonsUITests`: native tests and synthetic fixtures. `tools/refresh_menus.py`: central publisher. `.github/workflows/menus.yml`: schedule and Pages deployment.
+## Having trouble?
 
-This is an independent student project. No university logo is bundled.
+| What you see | What to try |
+| --- | --- |
+| Sideloadly cannot find your phone | Unlock it, check the cable, and accept the Trust prompt. On Windows, check that iTunes sees it; on Mac, check Finder. |
+| An untrusted-developer or Developer Mode message | Follow step 4 above. |
+| Commons stopped opening after about a week | Renew the installation using Sideloadly. |
+| No menu, or an older menu | Check your internet connection and tap **MSOE** with the refresh arrow. If it is still unavailable, open the original menu link inside Commons. |
+| No dishes match | Check the selected date, meal, search, and dietary filters. |
+
+Still stuck? [Ask for help](https://github.com/aceher-1/cc_app/issues) and include the exact error message, your iOS version, and whether you use Windows or Mac.
+
+## Your privacy
+
+Your dietary and section choices are saved on your phone and are not sent with menu requests. Downloads use GitHub's hosting, which [records IP addresses for security](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection).
+
+## For contributors
+
+See the [developer guide](DEVELOPMENT.md) for code, testing, and menu-update details, or the [verification notes](CHECKS.md) for completed checks.
+
+Commons is an independent student project, not an official MSOE or Sodexo app.
