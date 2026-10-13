@@ -6,6 +6,24 @@ struct DietaryPreferences: Codable, Equatable {
     var halalPotentiallySuitable = false
     var count: Int { excludedAllergens.count + requiredDiets.count + (halalPotentiallySuitable ? 1 : 0) }
 
+    func exclusionReasons(for item: MenuItem) -> [String] {
+        var reasons: [String] = []
+        if !excludedAllergens.isEmpty {
+            if !item.hasAllergenData || !item.unknownAllergens.isEmpty {
+                reasons.append("Allergen information is missing or unrecognized.")
+            }
+            let listed = Allergen.allCases.filter { excludedAllergens.contains($0) && item.allergens.contains($0) }
+            if !listed.isEmpty { reasons.append("Lists excluded allergens: \(listed.map(\.title).joined(separator: ", ")).") }
+        }
+        let missing = Diet.allCases.filter { requiredDiets.contains($0) && !item.diets.contains($0) }
+        if !missing.isEmpty { reasons.append("Missing required labels: \(missing.map(\.title).joined(separator: ", ")).") }
+        if halalPotentiallySuitable {
+            let assessment = HalalAssessment.assess(item)
+            if assessment.status != .potentiallySuitable { reasons.append("Halal screen: \(assessment.reason)") }
+        }
+        return reasons
+    }
+
     func includes(_ item: MenuItem) -> Bool {
         if !excludedAllergens.isEmpty {
             guard item.hasAllergenData, item.unknownAllergens.isEmpty,

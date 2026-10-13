@@ -4,9 +4,15 @@ struct ItemDetailView: View {
     let item: MenuItem
     let station: String
     let meal: String
+    var filterReasons: [String] = []
     private var assessment: HalalAssessment { HalalAssessment.assess(item) }
     var body: some View {
         List {
+            if !filterReasons.isEmpty {
+                Section("Excluded by your dietary filters") {
+                    ForEach(filterReasons, id: \.self) { Text($0) }
+                }
+            }
             Section {
                 Text(item.name).font(.title2.bold())
                 Text("\(station) · \(meal)").font(.subheadline).foregroundStyle(CommonsTheme.red)

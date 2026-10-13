@@ -63,6 +63,19 @@ final class MenuStore: ObservableObject {
     }
     var visibleCount: Int { visibleStations.reduce(0) { $0 + $1.items.count } }
 
+    // Keep stations whose search results are all excluded so their hidden dishes remain inspectable.
+    var searchedStations: [MenuStation] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return layout.ordered((currentMeal?.stations ?? []).compactMap { station in
+            let items = station.items.filter { item in
+                query.isEmpty || item.name.localizedCaseInsensitiveContains(query)
+                    || item.description.localizedCaseInsensitiveContains(query)
+                    || station.name.localizedCaseInsensitiveContains(query)
+            }
+            return items.isEmpty ? nil : MenuStation(id: station.id, name: station.name, items: items)
+        })
+    }
+
     var currentMealIndex: Int? {
         guard let meal = currentMeal else { return nil }
         return currentMenu?.meals.firstIndex(where: { $0.id == meal.id })

@@ -18,6 +18,28 @@ private actor StubMenuService: MenuFetching {
 
 @MainActor
 final class MenuStoreTests: XCTestCase {
+    func testEntirelyFilteredStationRemainsAvailableAndSearchLimitsHiddenItems() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let suite = "CommonsHiddenTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { try? FileManager.default.removeItem(at: directory); defaults.removePersistentDomain(forName: suite) }
+        let data = Data(#"[{"name":"Lunch","groups":[{"name":"Grill","items":[{"name":"Beef hot dog"},{"name":"Cheeseburger"}]}]}]"#.utf8)
+        let service = StubMenuService()
+        await service.setMeals(try MenuParser.parse(data, dateKey: DiningDay.key(for: Date()), fetchedAt: Date()).meals)
+        let store = MenuStore(service: service, cache: DailyCache(directory: directory), defaults: defaults)
+        await store.load()
+        store.preferences.halalPotentiallySuitable = true
+        XCTAssertEqual(store.visibleCount, 0)
+        XCTAssertEqual(store.searchedStations.first?.items.count, 2)
+        store.searchText = "hot dog"
+        XCTAssertEqual(store.searchedStations.first?.items.map(\.name), ["Beef hot dog"])
+        let item = try XCTUnwrap(store.searchedStations.first?.items.first)
+        XCTAssertFalse(store.preferences.exclusionReasons(for: item).isEmpty)
+        store.searchText = "Grill"
+        XCTAssertEqual(store.searchedStations.first?.items.count, 2)
+        let calls = await service.calls
+        XCTAssertEqual(calls, 1)
+    }
     func testMealNavigationAndSavedSectionLayoutDoNotFetchAgain() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let suite = "CommonsNavigationTests.\(UUID().uuidString)"

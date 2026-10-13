@@ -7,6 +7,7 @@ struct MenuView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showFilters = false
     @State private var showLayout = false
+    @State private var expandedFilteredStations: Set<String> = []
     @State private var refreshConfirmation: String?
     @Namespace private var mealSelection
     private let minuteTick = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
@@ -61,6 +62,10 @@ struct MenuView: View {
             .sheet(isPresented: $showLayout) { SectionLayoutView().environmentObject(store) }
             .task(id: store.selectedDateKey) { await store.load() }
             .onChange(of: store.selectedDateKey) { _, _ in refreshConfirmation = nil }
+            .onChange(of: store.selectedDateKey) { _, _ in expandedFilteredStations.removeAll() }
+            .onChange(of: store.currentMeal?.id) { _, _ in expandedFilteredStations.removeAll() }
+            .onChange(of: store.preferences) { _, _ in expandedFilteredStations.removeAll() }
+            .onChange(of: store.searchText) { _, _ in expandedFilteredStations.removeAll() }
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active { Task { await store.foreground() } }
             }
@@ -230,13 +235,13 @@ struct MenuView: View {
             if let menu = store.currentMenu {
                 if menu.itemCount == 0 {
                     EmptyMenuView(symbol: "calendar.badge.clock", title: "No menu posted yet", detail: "Sodexo has not listed dishes for this date. Check another day or refresh later.")
-                } else if store.visibleCount == 0 {
+                } else if store.searchedStations.isEmpty {
                     EmptyMenuView(symbol: "line.3.horizontal.decrease.circle", title: "No matching dishes", detail: "Try another meal, change your filters, or clear your search.")
                     if !store.searchText.isEmpty { Button("Clear search") { store.searchText = "" } }
                     Button("Edit dietary filters") { showFilters = true }
                 } else {
                     HStack {
-                        Text("\(store.visibleCount) \(store.visibleCount == 1 ? "dish" : "dishes")").font(.headline)
+                        Text("\(store.visibleCount) \(store.visibleCount == 1 ? "matching dish" : "matching dishes")").font(.headline)
                         Spacer()
                         if store.preferences.count > 0 {
                             Button("Filters on") { showFilters = true }.font(.caption.weight(.semibold))
@@ -246,7 +251,7 @@ struct MenuView: View {
                         Label("Potentially suitable • not halal certified", systemImage: "info.circle")
                             .font(.caption).foregroundStyle(.secondary)
                     }
-                    ForEach(store.visibleStations) { station in stationCard(station) }
+                    ForEach(store.searchedStations) { station in stationCard(station) }
                         .id(store.currentMeal?.id)
                         .transition(.opacity)
                 }
@@ -271,6 +276,8 @@ struct MenuView: View {
 
     private func stationCard(_ station: MenuStation) -> some View {
         let collapsed = store.layout.isCollapsed(station.name)
+        let matching = station.items.filter { store.preferences.includes($0) }
+        let excluded = station.items.filter { !store.preferences.includes($0) }
         return VStack(alignment: .leading, spacing: 0) {
             Button {
                 withAnimation(mealAnimation) { store.layout.setCollapsed(!collapsed, for: station.name) }
@@ -279,7 +286,7 @@ struct MenuView: View {
                     Rectangle().fill(CommonsTheme.red).frame(width: 4, height: 18)
                     Text(station.name).font(.title3.bold()).foregroundStyle(.primary)
                     Spacer()
-                    Text("\(station.items.count)").font(.caption.bold()).foregroundStyle(.secondary)
+                    Text("\(matching.count)").font(.caption.bold()).foregroundStyle(.secondary)
                     Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.secondary)
                         .rotationEffect(.degrees(collapsed ? 0 : 90))
                 }.padding(16).frame(maxWidth: .infinity, minHeight: 52).contentShape(Rectangle())
@@ -290,14 +297,49 @@ struct MenuView: View {
             .accessibilityHint(collapsed ? "Show dishes in this section." : "Hide dishes in this section.")
             .accessibilityIdentifier("section.toggle.\(station.name)")
             if !collapsed {
-                ForEach(station.items) { item in
+                ForEach(matching) { item in dishLink(item, station: station, excluded: false) }
+                if !excluded.isEmpty {
                     Divider().padding(.horizontal, 16)
-                    NavigationLink { ItemDetailView(item: item, station: station.name, meal: store.currentMeal?.name ?? "") } label: {
-                        MenuItemRow(item: item, showHalal: store.preferences.halalPotentiallySuitable)
-                    }.buttonStyle(.plain)
+                    DisclosureGroup(isExpanded: Binding(
+                        get: { expandedFilteredStations.contains(station.id) },
+                        set: { expanded in
+                            if expanded { expandedFilteredStations.insert(station.id) }
+                            else { expandedFilteredStations.remove(station.id) }
+                        }
+                    )) {
+                        ForEach(excluded) { item in dishLink(item, station: station, excluded: true) }
+                    } label: {
+                        Text("\(excluded.count) \(excluded.count == 1 ? "dish hidden" : "dishes hidden") by dietary filters")
+                            .font(.subheadline.weight(.medium))
+                    }
+                    .tint(CommonsTheme.red)
+                    .padding(16)
+                    .accessibilityIdentifier("filtered.\(station.name)")
                 }
             }
         }.background(CommonsTheme.card, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private func dishLink(_ item: MenuItem, station: MenuStation, excluded: Bool) -> some View {
+        let reasons = excluded ? store.preferences.exclusionReasons(for: item) : []
+        return VStack(alignment: .leading, spacing: 0) {
+            if !excluded { Divider().padding(.horizontal, 16) }
+            NavigationLink {
+                ItemDetailView(item: item, station: station.name, meal: store.currentMeal?.name ?? "", filterReasons: reasons)
+            } label: {
+                VStack(alignment: .leading, spacing: 0) {
+                    MenuItemRow(item: item, showHalal: store.preferences.halalPotentiallySuitable && !excluded)
+                    if excluded {
+                        Label("Excluded by your dietary filters", systemImage: "exclamationmark.circle")
+                            .font(.caption.bold()).foregroundStyle(CommonsTheme.red)
+                            .padding(.horizontal, 16)
+                        Text(reasons.joined(separator: " "))
+                            .font(.caption).foregroundStyle(.secondary)
+                            .padding(.horizontal, 16).padding(.bottom, 12)
+                    }
+                }
+            }.buttonStyle(.plain)
+        }
     }
 
     private var footer: some View {

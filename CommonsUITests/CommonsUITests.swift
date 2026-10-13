@@ -21,6 +21,16 @@ final class CommonsUITests: XCTestCase {
         app.buttons["filters.done"].tap()
         XCTAssertTrue(app.staticTexts["Sample oatmeal"].exists)
         XCTAssertFalse(app.staticTexts["Sample bacon toast"].exists)
+        let disclosure = app.staticTexts["1 dish hidden by dietary filters"]
+        XCTAssertTrue(disclosure.waitForExistence(timeout: 5))
+        disclosure.tap()
+        XCTAssertTrue(app.staticTexts["Sample bacon toast"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Excluded by your dietary filters"].exists)
+        screenshot(app, name: "07-revealed-filtered-dishes")
+        disclosure.tap()
+        XCTAssertFalse(app.staticTexts["Sample bacon toast"].exists)
+        disclosure.tap()
+        XCTAssertTrue(app.staticTexts["Sample bacon toast"].exists)
         app.terminate()
         app.launchArguments = ["--ui-testing"]
         app.launch()
