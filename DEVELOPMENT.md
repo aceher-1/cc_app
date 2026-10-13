@@ -2,6 +2,8 @@
 
 For installation and everyday use, start with the [README](README.md). This guide covers the app code, menu updates, and testing.
 
+For publishing from Windows, see the [App Store checklist](APP_STORE.md). Both native build workflows select Xcode 26.2 and the iOS 26.2 SDK explicitly; the minimum supported iOS version remains 17.
+
 A SwiftUI iPhone app for the [MSOE Robert Spitzer Dining Commons menu](https://msoedining.sodexomyway.com/en-us/locations/the-dining-commons). Red/black styling, date and meal navigation, station cards, search, ingredients, nutrition, and locally saved dietary preferences.
 
 ## Personalize the menu
