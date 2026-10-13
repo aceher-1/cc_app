@@ -39,3 +39,14 @@ Verified October 12, 2026 (America/Chicago), commit `4f5e62e`.
 - The [iPhone release build](https://github.com/aceher-1/cc_app/actions/runs/38337090992) passed, including ARM64 and iOS platform checks and unsigned IPA packaging. The downloaded artifact checksum was independently verified, and its Info.plist records DTXcode 2620, iphoneos26.2, minimum iOS 17.0, version 1.1, build 2.
 - The [native checks](https://github.com/aceher-1/cc_app/actions/runs/38337090522) passed, including Swift package tests, iPhone simulator app/unit/UI tests, and screenshot export.
 - No app source changes or minimum-iOS increase were necessary. Signing, App Store upload, physical-device testing, and Apple review are still outstanding; see APP_STORE.md. The separate manual screenshot recovery workflow was configured but not rerun.
+
+
+## Inspecting dietary exclusions
+
+Verified October 13, 2026, commit `2964122`.
+
+- The [device build](https://github.com/aceher-1/cc_app/actions/runs/38406706652) passed and provides a new unsigned IPA with per-station filtered-food dropdowns.
+- The [native checks](https://github.com/aceher-1/cc_app/actions/runs/38406706522) passed. UI automation enabled the halal filter, verified the hidden count, opened and closed the dropdown, checked the excluded warning, and confirmed hidden dishes were closed again after relaunch while filters remained saved. Existing customization and navigation checks also passed.
+- A new store test verifies that an entirely excluded station stays inspectable, search restricts hidden items without changing filters, exclusion reasons exist, and no extra fetch occurs.
+- A test screenshot was downloaded; the dropdown label and matching-dish counts render correctly. Revealed content below the viewport was verified by UI assertions.
+- The shared-menu publisher was manually refreshed successfully in [this run](https://github.com/aceher-1/cc_app/actions/runs/38406176773). The deployed manifest timestamp is 2026-10-13T13:35:28Z. Live source and published October 13 lunch both contained All Beef Hot Dog before refreshing; it was excluded by the enabled halal filter rather than missing from publication.

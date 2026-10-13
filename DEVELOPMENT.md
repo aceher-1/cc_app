@@ -8,6 +8,8 @@ A SwiftUI iPhone app for the [MSOE Robert Spitzer Dining Commons menu](https://m
 
 ## Personalize the menu
 
+- Each station includes a closed-by-default dropdown showing how many dishes your dietary filters hide. Expand it to inspect excluded dishes and the reasons; these items are marked as excluded in both the menu and dish details. Stations remain available even when all their dishes are excluded. Search applies to matching and hidden dishes alike. Revealing hidden dishes does not change saved filters, and the dropdowns reset on date, meal, filter, or search changes and after relaunch.
+
 - Tap **Organize** beside the current meal name to drag station sections into your preferred order. Switches collapse or expand their dishes; the section headers and matching-dish counts remain visible. Expand/collapse all applies to the listed meal's sections, and **Reset section layout** restores provider order and expands every section.
 - Tap any station header to collapse or expand it directly. Layout choices save locally, independently of dietary filters, and follow matching station names across dates and meals. Newly encountered stations appear after saved sections in their original source order. Duplicate station names share layout choices and keep their relative source order.
 - The selected meal has a red pill, a checkmark, and an explicit meal heading. Buttons have press feedback, transitions, and a light selection haptic. The page background changes subtly with the selected meal. Reduce Motion turns off the new meal and collapse animations.

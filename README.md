@@ -76,6 +76,7 @@ Download the newest app file from the same download page, then repeat step 3. Us
 
 - **Pick a date:** tap a day above the menu.
 - **Change meals:** tap Breakfast, Lunch, Dinner, or another available meal. The selected meal is red and has a checkmark. You can also swipe left or right across the menu.
+- **Inspect filtered foods:** open the “dishes hidden by dietary filters” dropdown at the bottom of a section. These dishes show why they were excluded. Close it to hide them again; your saved filters stay on.
 - **Find a dish:** use the search box. Tap a dish for its ingredients, listed allergens, and nutrition.
 - **Save dietary choices:** tap the sliders in the top-right corner. Choose the allergens to exclude, the diet labels you want, or the halal ingredient screen. Your choices are remembered next time. Selecting several diet labels requires a dish to match all of them.
 - **Arrange sections:** tap **Organize** next to the meal name, then drag the handles beside section names. Your order is remembered for matching sections on other days.
