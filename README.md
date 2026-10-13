@@ -17,6 +17,8 @@ You will need:
 
 **Commons is not available in the App Store yet.** You install it using a free computer app called Sideloadly. With a free Apple Account, the installation needs to be renewed every **seven days**. This guide explains how. Commons itself has no login.
 
+Planning to publish the app? See the [Windows-to-App-Store checklist](APP_STORE.md) for the remaining setup.
+
 ## Install Commons on your iPhone
 
 ### 1. Download Commons onto your computer

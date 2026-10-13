@@ -29,3 +29,13 @@ Verified October 12, 2026.
 - The [final version 1.1 device build](https://github.com/aceher-1/cc_app/actions/runs/38291807453) passed for commit `b143ae1`. After downloading its `commons-iphone-ipa` artifact, independent checks verified the SHA-256 checksum, iPhoneOS platform, minimum iOS 17.0, ARM64 executable, version 1.1/build 2, and absence of the sample-oatmeal fixture string in the release executable. Binary inspection also confirmed the corrected UTF-8 footer labels and absence of the four garbled sequences. Local signing and physical-phone launch still require the user's device.
 - The [final version 1.1 native checks](https://github.com/aceher-1/cc_app/actions/runs/38290305744) passed for commit `f3fc1a8`: 13 Swift package tests, 19 iPhone unit tests, and all four UI tests. UI automation performed an actual section-handle drag and verified order after relaunch; it also checked collapse persistence across refresh/relaunch, layout reset, dish navigation, meal buttons, left/right meal swipes and boundaries, vertical scrolling, refresh feedback, and saved halal preferences.
 - The final PNG screenshots were downloaded and reviewed, including the reordered sections after relaunch. Visual review exposed four garbled punctuation literals introduced during a Windows file edit. Those literals were restored to valid UTF-8 after the native tests; all app sources passed a check for the garbled sequences. This final correction changes display text only.
+
+
+## Xcode 26.2 build environment
+
+Verified October 12, 2026 (America/Chicago), commit `4f5e62e`.
+
+- Both native build workflows explicitly select Xcode 26.2 and check that the physical-device SDK is 26.2 before building. The screenshot recovery workflow also selects the matching Xcode version.
+- The [iPhone release build](https://github.com/aceher-1/cc_app/actions/runs/38337090992) passed, including ARM64 and iOS platform checks and unsigned IPA packaging. The downloaded artifact checksum was independently verified, and its Info.plist records DTXcode 2620, iphoneos26.2, minimum iOS 17.0, version 1.1, build 2.
+- The [native checks](https://github.com/aceher-1/cc_app/actions/runs/38337090522) passed, including Swift package tests, iPhone simulator app/unit/UI tests, and screenshot export.
+- No app source changes or minimum-iOS increase were necessary. Signing, App Store upload, physical-device testing, and Apple review are still outstanding; see APP_STORE.md. The separate manual screenshot recovery workflow was configured but not rerun.
