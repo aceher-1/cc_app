@@ -12,7 +12,7 @@ The current app version is **1.1**. Use version 1.1 on the Distribution page whe
 
 ## 2. Create your signing certificate on Windows
 
-You need **PowerShell 7.2 or newer** (the `pwsh` command), not the older Windows PowerShell 5 app. Open PowerShell in your local `cc_app` folder.
+You need **PowerShell 7.2 or newer** (the `pwsh` command), not the older Windows PowerShell 5 app. If `pwsh` is not recognized, install PowerShell using [Microsoft's Windows instructions](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows), then open a new terminal. Open PowerShell in your local `cc_app` folder.
 
 Create a signing request and an encrypted private key in a folder outside the repository:
 

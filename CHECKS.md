@@ -50,3 +50,15 @@ Verified October 13, 2026, commit `2964122`.
 - A new store test verifies that an entirely excluded station stays inspectable, search restricts hidden items without changing filters, exclusion reasons exist, and no extra fetch occurs.
 - A test screenshot was downloaded; the dropdown label and matching-dish counts render correctly. Revealed content below the viewport was verified by UI assertions.
 - The shared-menu publisher was manually refreshed successfully in [this run](https://github.com/aceher-1/cc_app/actions/runs/38406176773). The deployed manifest timestamp is 2026-10-13T13:35:28Z. Live source and published October 13 lunch both contained All Beef Hot Dog before refreshing; it was excluded by the enabled halal filter rather than missing from publication.
+
+
+## App Store identity and release workflow
+
+Verified October 15, 2026.
+
+- The project and generator use `com.aceher.msoedining`; test identifiers use matching suffixes. The Home Screen name is MSOE Dining. The app retains minimum iOS 17 and version 1.1, and declares no non-exempt encryption for its system HTTPS networking.
+- The [release archive check](https://github.com/aceher-1/cc_app/actions/runs/38801763233) passed for app-source commit `d8333e5`. Downloaded archive metadata confirms the registered identifier, build 2001.1, and iphoneos26.2 SDK. The archive also passed ARM64 and encryption-declaration assertions. Apple's installed uploader supports validation, upload, and API-key authentication.
+- Six Python checks passed, including mismatched app/team, expired or non-store profiles, and missing matching private-key identity. All release workflow shell blocks passed Bash syntax checking. The Windows helper passed an encrypted-key/CSR/P12 round trip using a synthetic self-signed certificate, with temporary test material removed.
+- Native [iOS 26.2 checks](https://github.com/aceher-1/cc_app/actions/runs/38804950191) passed 13 package tests, all 20 native unit tests, and three of four UI tests. The reordering UI test failed; recordings showed a drag ending outside the destination row. The test now uses an interior drop point and waits for the order to change. One focused attempt also timed out launching the cold simulator.
+- The [final focused reordering check](https://github.com/aceher-1/cc_app/actions/runs/38807754568) passed for `3715ba0`, including reordering and persistence after relaunch. CI now selects the iOS SDK's matching simulator, explicitly boots it, disables parallel simulator clones, and supports focused manual checks. The full suite was not rerun after these test/environment-only corrections; the app source is unchanged from the successful release archive.
+- No real Apple signing or upload credentials were available or committed. Signed export, Apple validation, TestFlight upload, physical-device testing, and public App Review remain pending the owner's credential setup. See APP_STORE.md for the seven encrypted GitHub Secrets and Windows-only setup steps. The existing unsigned sideloading workflow remains separate.

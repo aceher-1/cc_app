@@ -44,7 +44,7 @@ Sodexo's widget/feed is undocumented and can change. Source changes produce erro
 
 ## Run on iPhone
 
-See [INSTALL.md](INSTALL.md) for step-by-step **Windows-to-iPhone installation**, signing renewal, or direct installation from a Mac. The **Build iPhone IPA** manual workflow provides a release `arm64` device build; the unsigned IPA must be signed locally before an iPhone can run it. No Apple signing credentials are uploaded to GitHub.
+See [INSTALL.md](INSTALL.md) for step-by-step **Windows-to-iPhone installation**, signing renewal, or direct installation from a Mac. The **Build iPhone IPA** manual workflow provides a release `arm64` device build; the unsigned IPA must be signed locally before an iPhone can run it. That unsigned workflow uses no Apple signing credentials. The separate TestFlight workflow reads signing and upload credentials from encrypted GitHub Actions secrets; see APP_STORE.md.
 
 1. On a Mac, use an Xcode version that supports the phone's iOS version (for iOS 26.2, Xcode 26.2 or a newer compatible stable version), and open **Commons.xcodeproj**.
 2. Choose the **Commons** scheme and an installed iPhone simulator, then Run. Minimum iOS version: **17**.

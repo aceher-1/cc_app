@@ -1,5 +1,7 @@
 # Install Commons on your iPhone
 
+New builds appear as **MSOE Dining**. The app now uses the registered identifier `com.aceher.msoedining`. Moving from an older `com.example` build creates a separate app; saved choices do not transfer automatically. Later updates with the same identifier preserve them. For TestFlight uploads, use the [Windows publishing guide](https://github.com/aceher-1/cc_app/blob/codex/initial-app/APP_STORE.md).
+
 ## Before you start
 
 Commons works on an **iPhone running iOS 17 or later**, including iPhone 15 on iOS 26.2. Check your version in **Settings > General > About**.

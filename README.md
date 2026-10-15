@@ -4,6 +4,8 @@ See what's being served at the **MSOE Robert Spitzer Dining Commons**. Browse me
 
 New builds appear on your Home Screen as **MSOE Dining**. For TestFlight and App Store uploads, follow the [Windows publishing guide](APP_STORE.md); the download instructions below are for sideloading.
 
+The registered app identifier is now `com.aceher.msoedining`. If you installed an older build with the `com.example` identifier, this installs as a separate app and those saved choices do not transfer automatically. Later updates using the same identifier retain your choices.
+
 [Install the app](#install-commons-on-your-iphone) · [Learn the controls](#using-commons) · [Get help](#having-trouble)
 
 ## Before you start
