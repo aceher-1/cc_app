@@ -2,6 +2,8 @@
 
 See what's being served at the **MSOE Robert Spitzer Dining Commons**. Browse meals, search dishes, save dietary choices, and arrange the menu the way you like it.
 
+New builds appear on your Home Screen as **MSOE Dining**. For TestFlight and App Store uploads, follow the [Windows publishing guide](APP_STORE.md); the download instructions below are for sideloading.
+
 [Install the app](#install-commons-on-your-iphone) · [Learn the controls](#using-commons) · [Get help](#having-trouble)
 
 ## Before you start

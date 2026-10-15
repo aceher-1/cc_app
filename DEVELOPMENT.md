@@ -48,7 +48,7 @@ See [INSTALL.md](INSTALL.md) for step-by-step **Windows-to-iPhone installation**
 
 1. On a Mac, use an Xcode version that supports the phone's iOS version (for iOS 26.2, Xcode 26.2 or a newer compatible stable version), and open **Commons.xcodeproj**.
 2. Choose the **Commons** scheme and an installed iPhone simulator, then Run. Minimum iOS version: **17**.
-3. For a physical iPhone, choose your Apple development team under Signing & Capabilities and replace `com.example.msoecommons` with your own bundle identifier, then select your iPhone and Run.
+3. For a physical iPhone, choose your Apple development team under Signing & Capabilities. The registered App Store identifier is `com.aceher.msoedining`; use a separate identifier for personal-team experiments. Then select your iPhone and Run.
 
 The Xcode project, shared scheme, and original geometric icon are included. No third-party iOS dependencies or XcodeGen setup is required. `python tools/generate_project.py` regenerates the project if source files are added.
 
@@ -107,7 +107,7 @@ This is an independent student project. No university logo is bundled.
 7. Choose **Product → Run** (Command-R). Xcode builds, signs, and installs Commons. Follow any trust prompts on the phone.
 8. Open Commons. With a free Personal Team, repeat Run to renew provisioning every seven days; reinstall over the existing app to retain preferences.
 
-For simple installation by friends or classmates, a future TestFlight release would require Apple Developer Program membership and a signed App Store Connect upload. TestFlight distribution is not configured in this repository yet.
+For TestFlight, use the **Upload to TestFlight** manual workflow after configuring your Apple signing and upload secrets. See [APP_STORE.md](APP_STORE.md) for Windows-only certificate setup and the upload steps. No Apple credentials are included in source control.
 
 ## Provide a fresh app download
 
