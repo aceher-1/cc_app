@@ -101,13 +101,18 @@ final class CommonsUITests: XCTestCase {
         let handles = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Reorder"))
         XCTAssertEqual(handles.count, 2, app.debugDescription)
         guard handles.count == 2 else { return }
-        // Cross the destination row's midpoint and allow the native list to settle before release.
-        let start = handles.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        let destination = handles.element(boundBy: 0).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0))
-        start.press(forDuration: 0.8, thenDragTo: destination, withVelocity: .slow, thenHoldForDuration: 0.5)
         let salad = app.switches["layout.expanded.Test salad bar"]
         let station = app.switches["layout.expanded.Test station"]
-        XCTAssertLessThan(salad.frame.minY, station.frame.minY)
+        // The grip is shorter than its row. Drag above the actual row, not merely
+        // to the top of the grip, so UIKit reliably crosses the insertion threshold.
+        let start = handles.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let destination = app.coordinate(withNormalizedOffset: .zero).withOffset(
+            CGVector(dx: handles.element(boundBy: 0).frame.midX, dy: station.frame.minY - 12))
+        start.press(forDuration: 1, thenDragTo: destination, withVelocity: .slow, thenHoldForDuration: 1)
+        let reordered = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            salad.frame.minY < station.frame.minY
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [reordered], timeout: 5), .completed)
         app.buttons["layout.done"].tap()
         app.terminate()
         app.launchArguments = ["--ui-testing"]
