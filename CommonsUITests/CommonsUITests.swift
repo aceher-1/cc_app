@@ -103,11 +103,11 @@ final class CommonsUITests: XCTestCase {
         guard handles.count == 2 else { return }
         let salad = app.switches["layout.expanded.Test salad bar"]
         let station = app.switches["layout.expanded.Test station"]
-        // The grip is shorter than its row. Drag above the actual row, not merely
-        // to the top of the grip, so UIKit reliably crosses the insertion threshold.
+        // Cross the row midpoint but release inside the row: releasing in the
+        // section header cancels UIKit's reorder and snaps the item back.
         let start = handles.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         let destination = app.coordinate(withNormalizedOffset: .zero).withOffset(
-            CGVector(dx: handles.element(boundBy: 0).frame.midX, dy: station.frame.minY - 12))
+            CGVector(dx: handles.element(boundBy: 0).frame.midX, dy: station.frame.minY + station.frame.height * 0.25))
         start.press(forDuration: 1, thenDragTo: destination, withVelocity: .slow, thenHoldForDuration: 1)
         let reordered = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
             salad.frame.minY < station.frame.minY

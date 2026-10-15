@@ -2,6 +2,15 @@ name: iOS checks
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: Run the full native suite or diagnose the section drag test
+        type: choice
+        default: full
+        options:
+          - full
+          - section-reorder
 permissions:
   contents: read
 jobs:
@@ -27,10 +36,16 @@ jobs:
           echo "Testing on $SIMULATOR_RUNTIME ($DEVICE_ID)"
           echo "SIMULATOR_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Build and test SwiftUI app on iPhone simulator
+        env:
+          TEST_SCOPE: ${{ inputs.test_scope }}
         run: |
           mkdir -p build
           set -o pipefail
-          xcodebuild test -project Commons.xcodeproj -scheme Commons -destination "platform=iOS Simulator,id=$SIMULATOR_ID" -resultBundlePath build/Commons.xcresult CODE_SIGNING_ALLOWED=NO | tee build/xcodebuild.log
+          TEST_SELECTION=()
+          if [ "$TEST_SCOPE" = section-reorder ]; then
+            TEST_SELECTION=(-only-testing:CommonsUITests/CommonsUITests/testDraggingSectionOrderSurvivesRelaunch)
+          fi
+          xcodebuild test -project Commons.xcodeproj -scheme Commons -destination "platform=iOS Simulator,id=$SIMULATOR_ID" -resultBundlePath build/Commons.xcresult "${TEST_SELECTION[@]}" CODE_SIGNING_ALLOWED=NO | tee build/xcodebuild.log
       - name: Export test screenshots as PNG for Windows review
         if: always()
         run: |
