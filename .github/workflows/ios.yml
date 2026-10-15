@@ -18,9 +18,13 @@ jobs:
           test "$(xcrun --sdk iphoneos --show-sdk-version)" = '26.2'
       - name: Test menu parsing, filters, preferences, and cache
         run: swift test
-      - name: Select an available iPhone simulator
+      - name: Select an iPhone simulator matching the selected iOS SDK
         run: |
-          DEVICE_ID=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for group in d["devices"].values() for x in group if x["name"].startswith("iPhone")))')
+          set -euo pipefail
+          SDK_VERSION=$(xcrun --sdk iphonesimulator --show-sdk-version)
+          export SIMULATOR_RUNTIME="com.apple.CoreSimulator.SimRuntime.iOS-${SDK_VERSION//./-}"
+          DEVICE_ID=$(xcrun simctl list devices available --json | python3 -c 'import json,os,sys; d=json.load(sys.stdin); devices=d["devices"].get(os.environ["SIMULATOR_RUNTIME"], []); print(next(x["udid"] for x in devices if x["name"].startswith("iPhone")))')
+          echo "Testing on $SIMULATOR_RUNTIME ($DEVICE_ID)"
           echo "SIMULATOR_ID=$DEVICE_ID" >> "$GITHUB_ENV"
       - name: Build and test SwiftUI app on iPhone simulator
         run: |
