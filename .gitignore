@@ -7,3 +7,10 @@ xcuserdata/
 __pycache__/
 .swiftpm/
 _site/
+*.p12
+*.p8
+*.pem
+*.key
+*.cer
+*.mobileprovision
+*.certSigningRequest
