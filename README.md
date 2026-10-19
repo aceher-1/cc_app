@@ -103,6 +103,8 @@ Still stuck? [Ask for help](https://github.com/aceher-1/cc_app/issues) and inclu
 
 ## Your privacy
 
+Read the [privacy policy](https://aceher-1.github.io/cc_app/privacy.html). Its source is maintained in [public/privacy.html](public/privacy.html) and published alongside the shared menus.
+
 Your dietary and section choices are saved on your phone and are not sent with menu requests. Downloads use GitHub's hosting, which [records IP addresses for security](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection).
 
 ## For contributors

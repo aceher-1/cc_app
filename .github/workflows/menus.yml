@@ -4,6 +4,7 @@ on:
     paths:
       - tools/refresh_menus.py
       - tools/tests/**
+      - public/**
       - .github/workflows/menus.yml
   schedule:
     - cron: '23 4 * * *'
@@ -27,6 +28,8 @@ jobs:
         run: python -m unittest discover -s tools/tests -v
       - name: Fetch all menu dates once centrally
         run: python tools/refresh_menus.py --output _site
+      - name: Include public privacy policy
+        run: cp -R public/. _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:
