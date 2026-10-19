@@ -72,7 +72,9 @@ final class WidgetTests: XCTestCase {
         let missingHours = WidgetMealState.make(now: date("2026-10-19T17:00:00Z"), menus: [menu("2026-10-19")],
                                                hours: nil, preferences: .init(), layout: .init())
         XCTAssertFalse(missingHours.hoursKnown)
-        XCTAssertNil(missingHours.current)
+        XCTAssertEqual(missingHours.current?.name, "Breakfast")
+        XCTAssertNil(missingHours.current?.startsAt)
+        XCTAssertNil(missingHours.next)
     }
     func testDSTClockAndStaleMenus() {
         XCTAssertEqual(MealHours.date("07:00", on: "2026-11-02"), date("2026-11-02T13:00:00Z"))

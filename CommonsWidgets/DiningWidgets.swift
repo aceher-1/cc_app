@@ -109,11 +109,15 @@ struct DiningWidgetView: View {
             if entry.needsSetup {
                 Text("Open MSOE Dining").font(.headline)
                 Text("Widget sharing is unavailable.").font(.caption)
-            } else if family == .systemMedium {
+            } else if family == .systemMedium && entry.meals.hoursKnown {
                 HStack(alignment: .top, spacing: 12) {
-                    mealColumn(entry.meals.current, label: entry.meals.hoursKnown ? "NOW" : "TODAY")
+                    Link(destination: entry.meals.current?.url ?? URL(string: "msoedining://menu")!) {
+                        mealColumn(entry.meals.current, label: entry.meals.hoursKnown ? "NOW" : "TODAY")
+                    }
                     Rectangle().fill(.white.opacity(0.25)).frame(width: 1)
-                    mealColumn(entry.meals.next, label: "NEXT")
+                    Link(destination: entry.meals.next?.url ?? URL(string: "msoedining://menu")!) {
+                        mealColumn(entry.meals.next, label: "NEXT")
+                    }
                 }.frame(maxHeight: .infinity, alignment: .top)
                 countdown
             } else {
@@ -148,7 +152,7 @@ struct DiningWidgetView: View {
                         .font(.system(size: 9)).foregroundStyle(.white.opacity(0.75)).lineLimit(1)
                 }
             } else {
-                Text(entry.meals.hoursKnown ? (label == "NOW" ? "Between meals" : "Not posted") : "Hours unavailable")
+                Text(entry.meals.hoursKnown ? (label == "NOW" ? "No current menu" : "Not posted") : "Hours unavailable")
                     .font(.caption).lineLimit(2)
             }
         }.frame(maxWidth: .infinity, alignment: .leading)

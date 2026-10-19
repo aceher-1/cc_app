@@ -5,8 +5,7 @@ enum WidgetSync {
     static func settings(_ preferences: DietaryPreferences, layout: MenuLayoutPreferences) {
         guard let storage = WidgetStorage.shared else { return }
         let value = WidgetSettings(preferences: preferences, layout: layout)
-        guard let data = try? JSONEncoder().encode(value),
-              data != (try? Data(contentsOf: storage.directory.appendingPathComponent("settings.json"))) else { return }
+        guard value != storage.read("settings.json", as: WidgetSettings.self) else { return }
         do {
             try storage.write(value, named: "settings.json")
             WidgetCenter.shared.reloadTimelines(ofKind: WidgetStorage.kind)

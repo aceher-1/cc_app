@@ -86,6 +86,11 @@ struct WidgetMealState {
             return .init(current: brunch, next: nil, hoursKnown: false, stale: stale, filtersActive: preferences.count > 0)
         }
         let todayWindows = hours?.windows(on: today)
+        if todayWindows == nil {
+            // Without verified hours, preview a posted menu as TODAY, never as live service.
+            let preview = todayMenu.flatMap { menu in menu.meals.first.map { card($0, in: menu) } }
+            return .init(current: preview, next: nil, hoursKnown: false, stale: stale, filtersActive: preferences.count > 0)
+        }
         var scheduled: [WidgetMealCard] = []
         for menu in menus where menu.dateKey >= today {
             for window in hours?.windows(on: menu.dateKey) ?? [] {
@@ -104,7 +109,7 @@ struct WidgetMealState {
     }
 }
 
-struct WidgetSettings: Codable {
+struct WidgetSettings: Codable, Equatable {
     var preferences = DietaryPreferences()
     var layout = MenuLayoutPreferences()
 }

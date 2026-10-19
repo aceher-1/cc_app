@@ -1,5 +1,7 @@
 # Publish MSOE Dining from Windows
 
+**Version 1.2 widget update:** first follow [WIDGETS.md](WIDGETS.md) to enable the shared App Group and add `APPLE_WIDGET_PROFILE_BASE64`. The main app's profile must also be regenerated with the group enabled. The existing certificate and API key can be reused. Version 1.1 under review is unaffected.
+
 The app now uses **com.aceher.msoedining**, with **MSOE Dining** as its Home Screen name. The [Upload to TestFlight](https://github.com/aceher-1/cc_app/actions/workflows/testflight.yml) action builds an App Store archive, signs it, and uploads it to Apple. It does not submit the app for public review or release it automatically.
 
 Apple credentials are not included in the repository. The first signed upload needs the one-time setup below. Enter private values directly in GitHub's encrypted Actions secrets, not in a source file, issue, or chat.
