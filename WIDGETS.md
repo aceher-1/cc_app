@@ -48,3 +48,8 @@ The app and widget both use version 1.2 and the same CI build number. Secrets ne
 Core tests cover meal boundaries, gaps, tomorrow transitions, weekend behavior, expired hours, closure overrides, daylight saving time, dietary filtering, section order, stale menus, shared storage, and deep-link contents. The cloud iOS checks compile the embedded widget as part of the app and run the existing app tests.
 
 Before release, also verify both sizes on a real iPhone: launch the app once, change filters, tap each medium-widget meal, check weekend Brunch, and check a meal transition. Simulator compilation and model tests cannot prove iOS will refresh a Home Screen widget at an exact time.
+
+
+## TestFlight uploader
+
+The release workflow uploads the exported, signed IPA with [Apple-Actions/upload-testflight-build](https://github.com/Apple-Actions/upload-testflight-build), pinned to the v5.6.0 commit. It reuses `ASC_ISSUER_ID`, `ASC_KEY_ID`, and `ASC_PRIVATE_KEY`; no renamed secrets or new API key are needed. It uses the App Store Connect API backend and returns after upload, while Apple continues processing the build. This uploads to TestFlight and does not submit for App Review. The uploader still requires a signed IPA, so it does not replace the App Group and profile setup above.

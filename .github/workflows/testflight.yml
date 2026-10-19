@@ -36,9 +36,6 @@ jobs:
           test "$NUMBER" -le 9999
           test "$GITHUB_RUN_ATTEMPT" -le 99
           echo "RELEASE_BUILD_NUMBER=$NUMBER.$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
-          # Exercise the Apple uploader installed on this exact runner without authenticating.
-          xcrun altool --help > build/release/altool-help.txt 2>&1
-          grep -q -- '--apiKey' build/release/altool-help.txt
       - name: Test signing profile validation
         run: python3 -m unittest discover -s tools/tests -v
       - name: Check required Apple secrets
@@ -117,6 +114,7 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$WIDGET/Info.plist")" = "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist")"
           printf 'Bundle: %s\nBuild: %s\nSDK: %s\n' "$BUNDLE_ID" "$RELEASE_BUILD_NUMBER" "$(/usr/libexec/PlistBuddy -c 'Print :DTSDKName' "$APP/Info.plist")" > build/release/archive-details.txt
       - name: Export and verify signed App Store IPA
+        id: export
         if: inputs.destination != 'archive-check'
         run: |
           set -euo pipefail
@@ -124,24 +122,25 @@ jobs:
             -exportPath build/release/export -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
             | tee build/release/export.log
           codesign --verify --deep --strict build/Commons.xcarchive/Products/Applications/Commons.app
-          shasum -a 256 build/release/export/*.ipa > build/release/SHA256.txt
-      - name: Validate with Apple and upload to TestFlight
+          shopt -s nullglob
+          IPAS=(build/release/export/*.ipa)
+          test "${#IPAS[@]}" -eq 1
+          shasum -a 256 "${IPAS[0]}" > build/release/SHA256.txt
+          echo "ipa=${IPAS[0]}" >> "$GITHUB_OUTPUT"
+      - name: Upload signed IPA to TestFlight
         if: inputs.destination == 'testflight'
-        env:
-          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
-        run: |
-          set -euo pipefail
-          umask 077
-          mkdir -p "$RUNNER_TEMP/asc/private_keys"
-          printf '%s' "$ASC_PRIVATE_KEY" > "$RUNNER_TEMP/asc/private_keys/AuthKey_$ASC_KEY_ID.p8"
-          IPA=$(find "$GITHUB_WORKSPACE/build/release/export" -maxdepth 1 -name '*.ipa' -print -quit)
-          test -n "$IPA"
-          cd "$RUNNER_TEMP/asc"
-          xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" --output-format json
-          xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" --output-format json
-          echo 'Upload accepted. Wait for Apple processing, then open App Store Connect → TestFlight. This does not submit for public App Review.' >> "$GITHUB_STEP_SUMMARY"
+        uses: Apple-Actions/upload-testflight-build@155ea93be9ee6d5186c71f660a612f5eddb14510 # v5.6.0
+        with:
+          app-path: ${{ steps.export.outputs.ipa }}
+          app-type: ios
+          issuer-id: ${{ secrets.ASC_ISSUER_ID }}
+          api-key-id: ${{ secrets.ASC_KEY_ID }}
+          api-private-key: ${{ secrets.ASC_PRIVATE_KEY }}
+          backend: appstore-api
+          wait-for-processing: 'false'
+      - name: Explain upload result
+        if: success() && inputs.destination == 'testflight'
+        run: echo 'Upload accepted. Wait for Apple processing, then open App Store Connect → TestFlight. This does not submit for public App Review.' >> "$GITHUB_STEP_SUMMARY"
       - name: Save release files and build logs
         if: always()
         uses: actions/upload-artifact@v6
@@ -162,4 +161,3 @@ jobs:
           fi
           rm -f "$RUNNER_TEMP/widget.mobileprovision" "$RUNNER_TEMP/widget-profile.plist"
           rm -f "$RUNNER_TEMP/distribution.p12" "$RUNNER_TEMP/distribution.mobileprovision" "$RUNNER_TEMP/profile.plist" "$RUNNER_TEMP/ExportOptions.plist"
-          rm -rf "$RUNNER_TEMP/asc"
