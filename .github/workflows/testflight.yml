@@ -36,9 +36,6 @@ jobs:
           test "$NUMBER" -le 9999
           test "$GITHUB_RUN_ATTEMPT" -le 99
           echo "RELEASE_BUILD_NUMBER=$NUMBER.$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
-          # Exercise the Apple uploader installed on this exact runner without authenticating.
-          xcrun altool --help > build/release/altool-help.txt 2>&1
-          grep -q -- '--apiKey' build/release/altool-help.txt
       - name: Test signing profile validation
         run: python3 -m unittest discover -s tools/tests -v
       - name: Check required Apple secrets
@@ -48,12 +45,13 @@ jobs:
           APPLE_DISTRIBUTION_P12_BASE64: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
           APPLE_DISTRIBUTION_P12_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_P12_PASSWORD }}
           APPLE_PROFILE_BASE64: ${{ secrets.APPLE_PROFILE_BASE64 }}
+          APPLE_WIDGET_PROFILE_BASE64: ${{ secrets.APPLE_WIDGET_PROFILE_BASE64 }}
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
         run: |
           set -euo pipefail
-          for name in APPLE_TEAM_ID APPLE_DISTRIBUTION_P12_BASE64 APPLE_DISTRIBUTION_P12_PASSWORD APPLE_PROFILE_BASE64; do
+          for name in APPLE_TEAM_ID APPLE_DISTRIBUTION_P12_BASE64 APPLE_DISTRIBUTION_P12_PASSWORD APPLE_PROFILE_BASE64 APPLE_WIDGET_PROFILE_BASE64; do
             if [ -z "${!name}" ]; then echo "::error::Add the $name Actions secret; see APP_STORE.md."; exit 1; fi
           done
           if [ "$DESTINATION" = testflight ]; then
@@ -68,6 +66,7 @@ jobs:
           APPLE_DISTRIBUTION_P12_BASE64: ${{ secrets.APPLE_DISTRIBUTION_P12_BASE64 }}
           APPLE_DISTRIBUTION_P12_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_P12_PASSWORD }}
           APPLE_PROFILE_BASE64: ${{ secrets.APPLE_PROFILE_BASE64 }}
+          APPLE_WIDGET_PROFILE_BASE64: ${{ secrets.APPLE_WIDGET_PROFILE_BASE64 }}
         run: |
           set -euo pipefail
           umask 077
@@ -76,6 +75,7 @@ jobs:
           echo "::add-mask::$KEYCHAIN_PASSWORD"
           printf '%s' "$APPLE_DISTRIBUTION_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/distribution.p12"
           printf '%s' "$APPLE_PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/distribution.mobileprovision"
+          printf '%s' "$APPLE_WIDGET_PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/widget.mobileprovision"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
           security set-keychain-settings -lut 21600 "$KEYCHAIN"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
@@ -83,11 +83,14 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
           security list-keychains -d user -s "$KEYCHAIN" "$HOME/Library/Keychains/login.keychain-db"
           security cms -D -i "$RUNNER_TEMP/distribution.mobileprovision" > "$RUNNER_TEMP/profile.plist"
-          python3 tools/prepare_app_store.py "$RUNNER_TEMP/profile.plist" "$KEYCHAIN" "$RUNNER_TEMP/ExportOptions.plist"
+          security cms -D -i "$RUNNER_TEMP/widget.mobileprovision" > "$RUNNER_TEMP/widget-profile.plist"
+          python3 tools/prepare_app_store.py "$RUNNER_TEMP/profile.plist" "$KEYCHAIN" "$RUNNER_TEMP/ExportOptions.plist" --widget-profile "$RUNNER_TEMP/widget-profile.plist"
           PROFILE_UUID=$( /usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist" )
+          WIDGET_PROFILE_UUID=$( /usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/widget-profile.plist" )
           PROFILE_DIR="$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
           mkdir -p "$PROFILE_DIR"
           cp "$RUNNER_TEMP/distribution.mobileprovision" "$PROFILE_DIR/$PROFILE_UUID.mobileprovision"
+          cp "$RUNNER_TEMP/widget.mobileprovision" "$PROFILE_DIR/$WIDGET_PROFILE_UUID.mobileprovision"
       - name: Archive the release app
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -95,7 +98,7 @@ jobs:
           set -euo pipefail
           SIGNING=(CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO)
           if [ "$DESTINATION" != archive-check ]; then
-            SIGNING=(CODE_SIGN_STYLE=Manual "DEVELOPMENT_TEAM=$APPLE_TEAM_ID" "CODE_SIGN_IDENTITY=$SIGNING_IDENTITY" "PROVISIONING_PROFILE_SPECIFIER=$PROFILE_UUID" "OTHER_CODE_SIGN_FLAGS=--keychain $RUNNER_TEMP/commons-signing.keychain-db")
+            SIGNING=(CODE_SIGN_STYLE=Manual "DEVELOPMENT_TEAM=$APPLE_TEAM_ID" "CODE_SIGN_IDENTITY=$SIGNING_IDENTITY" "APP_PROFILE_UUID=$PROFILE_UUID" "WIDGET_PROFILE_UUID=$WIDGET_PROFILE_UUID" "OTHER_CODE_SIGN_FLAGS=--keychain $RUNNER_TEMP/commons-signing.keychain-db")
           fi
           xcodebuild archive -project Commons.xcodeproj -scheme Commons -configuration Release \
             -destination 'generic/platform=iOS' -archivePath build/Commons.xcarchive \
@@ -105,8 +108,13 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = "$BUNDLE_ID"
           test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "$APP/Info.plist")" = false
           test "$(xcrun lipo -archs "$APP/Commons")" = arm64
+          WIDGET="$APP/PlugIns/CommonsWidgets.appex"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$WIDGET/Info.plist")" = "$BUNDLE_ID.widgets"
+          test "$(xcrun lipo -archs "$WIDGET/CommonsWidgets")" = arm64
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$WIDGET/Info.plist")" = "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist")"
           printf 'Bundle: %s\nBuild: %s\nSDK: %s\n' "$BUNDLE_ID" "$RELEASE_BUILD_NUMBER" "$(/usr/libexec/PlistBuddy -c 'Print :DTSDKName' "$APP/Info.plist")" > build/release/archive-details.txt
       - name: Export and verify signed App Store IPA
+        id: export
         if: inputs.destination != 'archive-check'
         run: |
           set -euo pipefail
@@ -114,24 +122,25 @@ jobs:
             -exportPath build/release/export -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
             | tee build/release/export.log
           codesign --verify --deep --strict build/Commons.xcarchive/Products/Applications/Commons.app
-          shasum -a 256 build/release/export/*.ipa > build/release/SHA256.txt
-      - name: Validate with Apple and upload to TestFlight
+          shopt -s nullglob
+          IPAS=(build/release/export/*.ipa)
+          test "${#IPAS[@]}" -eq 1
+          shasum -a 256 "${IPAS[0]}" > build/release/SHA256.txt
+          echo "ipa=${IPAS[0]}" >> "$GITHUB_OUTPUT"
+      - name: Upload signed IPA to TestFlight
         if: inputs.destination == 'testflight'
-        env:
-          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
-        run: |
-          set -euo pipefail
-          umask 077
-          mkdir -p "$RUNNER_TEMP/asc/private_keys"
-          printf '%s' "$ASC_PRIVATE_KEY" > "$RUNNER_TEMP/asc/private_keys/AuthKey_$ASC_KEY_ID.p8"
-          IPA=$(find "$GITHUB_WORKSPACE/build/release/export" -maxdepth 1 -name '*.ipa' -print -quit)
-          test -n "$IPA"
-          cd "$RUNNER_TEMP/asc"
-          xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" --output-format json
-          xcrun altool --upload-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" --output-format json
-          echo 'Upload accepted. Wait for Apple processing, then open App Store Connect → TestFlight. This does not submit for public App Review.' >> "$GITHUB_STEP_SUMMARY"
+        uses: Apple-Actions/upload-testflight-build@155ea93be9ee6d5186c71f660a612f5eddb14510 # v5.6.0
+        with:
+          app-path: ${{ steps.export.outputs.ipa }}
+          app-type: ios
+          issuer-id: ${{ secrets.ASC_ISSUER_ID }}
+          api-key-id: ${{ secrets.ASC_KEY_ID }}
+          api-private-key: ${{ secrets.ASC_PRIVATE_KEY }}
+          backend: appstore-api
+          wait-for-processing: 'false'
+      - name: Explain upload result
+        if: success() && inputs.destination == 'testflight'
+        run: echo 'Upload accepted. Wait for Apple processing, then open App Store Connect → TestFlight. This does not submit for public App Review.' >> "$GITHUB_STEP_SUMMARY"
       - name: Save release files and build logs
         if: always()
         uses: actions/upload-artifact@v6
@@ -147,5 +156,8 @@ jobs:
           if [ -n "${PROFILE_UUID:-}" ]; then
             rm -f "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
           fi
+          if [ -n "${WIDGET_PROFILE_UUID:-}" ]; then
+            rm -f "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/$WIDGET_PROFILE_UUID.mobileprovision"
+          fi
+          rm -f "$RUNNER_TEMP/widget.mobileprovision" "$RUNNER_TEMP/widget-profile.plist"
           rm -f "$RUNNER_TEMP/distribution.p12" "$RUNNER_TEMP/distribution.mobileprovision" "$RUNNER_TEMP/profile.plist" "$RUNNER_TEMP/ExportOptions.plist"
-          rm -rf "$RUNNER_TEMP/asc"

@@ -62,3 +62,21 @@ Verified October 15, 2026.
 - Native [iOS 26.2 checks](https://github.com/aceher-1/cc_app/actions/runs/38804950191) passed 13 package tests, all 20 native unit tests, and three of four UI tests. The reordering UI test failed; recordings showed a drag ending outside the destination row. The test now uses an interior drop point and waits for the order to change. One focused attempt also timed out launching the cold simulator.
 - The [final focused reordering check](https://github.com/aceher-1/cc_app/actions/runs/38807754568) passed for `3715ba0`, including reordering and persistence after relaunch. CI now selects the iOS SDK's matching simulator, explicitly boots it, disables parallel simulator clones, and supports focused manual checks. The full suite was not rerun after these test/environment-only corrections; the app source is unchanged from the successful release archive.
 - No real Apple signing or upload credentials were available or committed. Signed export, Apple validation, TestFlight upload, physical-device testing, and public App Review remain pending the owner's credential setup. See APP_STORE.md for the seven encrypted GitHub Secrets and Windows-only setup steps. The existing unsigned sideloading workflow remains separate.
+
+
+## Version 1.2 widget update — October 19, 2026
+
+Development branch: `codex/widgets-1.2`; draft PR: https://github.com/aceher-1/cc_app/pull/1. The submitted version 1.1 build was not replaced.
+
+- Seven Python signing/publication tests passed locally, including the widget identifier and App Group checks.
+- Full simulator run on initial widget implementation: 19 core package tests, 26 native unit tests, and four existing UI tests passed: https://github.com/aceher-1/cc_app/actions/runs/39323624423.
+- Updated widget/deep-link run: 19 core package tests and 27 native unit tests passed, followed by a successful arm64 release archive containing the widget: https://github.com/aceher-1/cc_app/actions/runs/39324122108.
+- Final app/widget source at `968a7af` passed a separate unsigned App Store archive check, including embedded extension identity, architecture, and matching marketing versions. No compiler warnings appeared in the archive log: https://github.com/aceher-1/cc_app/actions/runs/39324727470.
+- Plist parsing, shared-hours JSON parsing, release Bash syntax, and git whitespace checks passed.
+
+The native tests precede the final widget-only presentation/setup-state refinements; the final release archive compiled those refinements. No real-device widget layout/refresh verification or signed version 1.2 upload has been performed. Follow WIDGETS.md for the Apple App Group/profile setup and release checklist. GitHub Pages rejected the initial feature-branch deployment under its existing branch protection; the final workflow deliberately skips deployment on feature branches. Publish the shared hours through the default branch after merge.
+
+
+### Signed widget beta uploaded
+
+Version **1.2 (2006.1)** was successfully archived, signed, exported, and uploaded to TestFlight with the pinned upload action on October 19, 2026: https://github.com/aceher-1/cc_app/actions/runs/39333929584. Both app and widget profiles passed App Group/certificate validation; temporary signing credentials were removed. This supersedes the earlier unsigned-only status. Apple processing and real-iPhone widget testing remain separate from upload acceptance. The version 1.1 App Review submission was not replaced.

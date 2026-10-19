@@ -2,6 +2,8 @@
 
 See what's being served at the **MSOE Robert Spitzer Dining Commons**. Browse meals, search dishes, save dietary choices, and arrange the menu the way you like it.
 
+The version 1.2 update adds small and medium Home Screen widgets with filtered meal previews and scheduled countdowns. Weekend widgets show Brunch with hours unavailable. See [widget setup and release notes](WIDGETS.md).
+
 New builds appear on your Home Screen as **MSOE Dining**. For TestFlight and App Store uploads, follow the [Windows publishing guide](APP_STORE.md); the download instructions below are for sideloading.
 
 The registered app identifier is now `com.aceher.msoedining`. If you installed an older build with the `com.example` identifier, this installs as a separate app and those saved choices do not transfer automatically. Later updates using the same identifier retain your choices.

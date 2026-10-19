@@ -12,9 +12,11 @@ import re
 import subprocess
 
 BUNDLE_ID = "com.aceher.msoedining"
+WIDGET_BUNDLE_ID = BUNDLE_ID + ".widgets"
+APP_GROUP = "group." + BUNDLE_ID
 
 
-def export_options(profile, team_id, identities, now=None):
+def export_options(profile, team_id, identities, now=None, bundle_id=BUNDLE_ID, require_group=False):
     now = now or dt.datetime.now(dt.timezone.utc)
     expiry = profile.get("ExpirationDate")
     if not isinstance(expiry, dt.datetime) or expiry.replace(tzinfo=dt.timezone.utc) <= now:
@@ -22,8 +24,10 @@ def export_options(profile, team_id, identities, now=None):
     entitlements = profile.get("Entitlements", {})
     if team_id not in profile.get("TeamIdentifier", []):
         raise ValueError("APPLE_TEAM_ID does not match the provisioning profile.")
-    if entitlements.get("application-identifier") != f"{team_id}.{BUNDLE_ID}":
-        raise ValueError(f"The profile must be explicitly registered for {BUNDLE_ID} on this team.")
+    if entitlements.get("application-identifier") != f"{team_id}.{bundle_id}":
+        raise ValueError(f"The profile must be explicitly registered for {bundle_id} on this team.")
+    if require_group and APP_GROUP not in entitlements.get("com.apple.security.application-groups", []):
+        raise ValueError(f"Enable {APP_GROUP} for {bundle_id} and regenerate its App Store profile; see WIDGETS.md.")
     if entitlements.get("com.apple.developer.team-identifier") != team_id:
         raise ValueError("The profile's signing entitlement does not match APPLE_TEAM_ID.")
     if entitlements.get("get-task-allow", True) or "ProvisionedDevices" in profile or profile.get("ProvisionsAllDevices"):
@@ -38,7 +42,7 @@ def export_options(profile, team_id, identities, now=None):
     return {
         "method": "app-store-connect", "destination": "export", "teamID": team_id,
         "signingStyle": "manual", "signingCertificate": identity,
-        "provisioningProfiles": {BUNDLE_ID: uuid},
+        "provisioningProfiles": {bundle_id: uuid},
         "manageAppVersionAndBuildNumber": False, "uploadSymbols": True,
         "stripSwiftSymbols": True,
     }
@@ -49,15 +53,22 @@ def main():
     parser.add_argument("profile", type=Path)
     parser.add_argument("keychain")
     parser.add_argument("output", type=Path)
+    parser.add_argument("--widget-profile", type=Path, required=True)
     args = parser.parse_args()
     team = os.environ["APPLE_TEAM_ID"]
     if not re.fullmatch(r"[A-Z0-9]{10}", team):
         raise ValueError("APPLE_TEAM_ID should be the 10-character identifier in your developer membership details.")
     identities = subprocess.check_output(["security", "find-identity", "-v", "-p", "codesigning", args.keychain], text=True)
-    options = export_options(plistlib.loads(args.profile.read_bytes()), team, identities)
+    options = export_options(plistlib.loads(args.profile.read_bytes()), team, identities, require_group=True)
+    widget = export_options(plistlib.loads(args.widget_profile.read_bytes()), team, identities,
+                            bundle_id=WIDGET_BUNDLE_ID, require_group=True)
+    if widget["signingCertificate"] != options["signingCertificate"]:
+        raise ValueError("App and widget profiles must use the same distribution certificate.")
+    options["provisioningProfiles"].update(widget["provisioningProfiles"])
     args.output.write_bytes(plistlib.dumps(options))
     with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as env:
         env.write(f"PROFILE_UUID={options['provisioningProfiles'][BUNDLE_ID]}\n")
+        env.write(f"WIDGET_PROFILE_UUID={options['provisioningProfiles'][WIDGET_BUNDLE_ID]}\n")
         env.write(f"SIGNING_IDENTITY={options['signingCertificate']}\n")
     print("Validated App Store distribution profile, team, expiry, and matching private-key identity.")
 

@@ -18,6 +18,23 @@ private actor StubMenuService: MenuFetching {
 
 @MainActor
 final class MenuStoreTests: XCTestCase {
+    func testWidgetLinkSelectsMealAndRejectsInvalidDateOrScheme() throws {
+        let suite = "CommonsWidgetLinkTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { defaults.removePersistentDomain(forName: suite); try? FileManager.default.removeItem(at: directory) }
+        let store = MenuStore(service: StubMenuService(), cache: DailyCache(directory: directory), defaults: defaults)
+        let tomorrow = DiningDay.key(for: DiningDay.calendar.date(byAdding: .day, value: 1, to: Date())!)
+        store.searchText = "previous search"
+        store.openWidgetURL(URL(string: "msoedining://menu?date=\(tomorrow)&meal=Dinner")!)
+        XCTAssertEqual(store.selectedDateKey, tomorrow)
+        XCTAssertEqual(store.selectedMealName, "Dinner")
+        XCTAssertEqual(store.searchText, "")
+        store.openWidgetURL(URL(string: "msoedining://menu?date=2020-01-01&meal=Breakfast")!)
+        XCTAssertEqual(store.selectedDateKey, tomorrow)
+        store.openWidgetURL(URL(string: "https://menu?date=\(DiningDay.key(for: Date()))&meal=Lunch")!)
+        XCTAssertEqual(store.selectedMealName, "Dinner")
+    }
     func testEntirelyFilteredStationRemainsAvailableAndSearchLimitsHiddenItems() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let suite = "CommonsHiddenTests.\(UUID().uuidString)"
