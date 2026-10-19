@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "timezone": "America/Chicago",
+  "source": "https://msoedining.sodexomyway.com/en-us/locations/the-dining-commons",
+  "verifiedOn": "2026-10-19",
+  "validThrough": "2026-11-18",
+  "weekdays": {
+    "2": [{"meal":"Breakfast","start":"07:00","end":"10:00"},{"meal":"Lunch","start":"11:00","end":"14:00"},{"meal":"Dinner","start":"16:00","end":"20:30"}],
+    "3": [{"meal":"Breakfast","start":"07:00","end":"10:00"},{"meal":"Lunch","start":"11:00","end":"14:00"},{"meal":"Dinner","start":"16:00","end":"20:30"}],
+    "4": [{"meal":"Breakfast","start":"07:00","end":"10:00"},{"meal":"Lunch","start":"11:00","end":"14:00"},{"meal":"Dinner","start":"16:00","end":"20:30"}],
+    "5": [{"meal":"Breakfast","start":"07:00","end":"10:00"},{"meal":"Lunch","start":"11:00","end":"14:00"},{"meal":"Dinner","start":"16:00","end":"20:30"}],
+    "6": [{"meal":"Breakfast","start":"07:00","end":"10:00"},{"meal":"Lunch","start":"11:00","end":"14:00"},{"meal":"Dinner","start":"16:00","end":"20:30"}]
+  },
+  "overrides": {}
+}
