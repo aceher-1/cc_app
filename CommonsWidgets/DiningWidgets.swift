@@ -71,7 +71,10 @@ struct DiningProvider: TimelineProvider {
             return [DiningEntry(date: now, meals: .init(current: nil, next: nil, hoursKnown: false,
                                                        stale: false, filtersActive: false), needsSetup: true)]
         }
-        let settings = storage.read("settings.json", as: WidgetSettings.self) ?? WidgetSettings()
+        guard let settings = storage.read("settings.json", as: WidgetSettings.self) else {
+            return [DiningEntry(date: now, meals: .init(current: nil, next: nil, hoursKnown: false,
+                                                       stale: false, filtersActive: false), needsSetup: true)]
+        }
         let hours = storage.read("hours.json", as: MealHours.self)
         let menus = (0...1).compactMap { offset -> DayMenu? in
             guard let date = DiningDay.calendar.date(byAdding: .day, value: offset, to: now) else { return nil }
@@ -100,7 +103,7 @@ struct DiningWidgetView: View {
     private let red = Color(red: 0.8, green: 0, blue: 0.18)
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Label("MSOE DINING", systemImage: "fork.knife").font(.system(size: 10, weight: .heavy))
                 Spacer(minLength: 0)
@@ -108,7 +111,7 @@ struct DiningWidgetView: View {
             }
             if entry.needsSetup {
                 Text("Open MSOE Dining").font(.headline)
-                Text("Widget sharing is unavailable.").font(.caption)
+                Text("Open the app to share your saved settings.").font(.caption)
             } else if family == .systemMedium && entry.meals.hoursKnown {
                 HStack(alignment: .top, spacing: 12) {
                     Link(destination: entry.meals.current?.url ?? URL(string: "msoedining://menu")!) {
@@ -138,14 +141,14 @@ struct DiningWidgetView: View {
     }
 
     private func mealColumn(_ meal: WidgetMealCard?, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(label).font(.system(size: 9, weight: .bold)).foregroundStyle(.white.opacity(0.75))
             if let meal {
                 Text(meal.name).font(.headline).lineLimit(1).minimumScaleFactor(0.8)
                 if meal.items.isEmpty {
                     Text(meal.totalCount == 0 ? "Menu not posted" : "No matching options").font(.caption).lineLimit(2)
                 } else {
-                    ForEach(Array(meal.items.prefix(family == .systemSmall ? 2 : 3).enumerated()), id: \.offset) { _, name in
+                    ForEach(Array(meal.items.prefix(entry.meals.stale ? 1 : 2).enumerated()), id: \.offset) { _, name in
                         Text(name).font(.system(size: 11)).lineLimit(1)
                     }
                     Text("\(meal.matchingCount) options\(entry.meals.filtersActive ? " · filtered" : "")")

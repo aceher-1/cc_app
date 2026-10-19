@@ -38,7 +38,8 @@ Do this on the Apple Developer website; no Mac is required:
 4. Regenerate the main app's **App Store Connect distribution profile** with App Groups enabled, using the existing distribution certificate. Download it and replace the repository secret `APPLE_PROFILE_BASE64` with its Base64 content.
 5. Create an **App Store Connect distribution profile** for the widget App ID, using that same certificate. Download it and add its Base64 content as the new repository secret `APPLE_WIDGET_PROFILE_BASE64`.
 6. Keep the existing P12, password, team ID, and App Store Connect API secrets. No new certificate or API key is required.
-7. Run **Upload to TestFlight** from branch `codex/widgets-1.2`. Start with **signed-download** if you want to inspect the signed release before uploading. The workflow validates both profiles, the shared group, and the certificate, then signs and embeds the extension.
+7. After checks pass, merge this update into `codex/initial-app` so its daily menu publisher includes `meal-hours.json`. GitHub Pages allows deployment only from that default branch; feature branches build menu data but do not publish it. Wait for the menu publication to succeed.
+8. Run **Upload to TestFlight** from the updated default branch. Start with **signed-download** if you want to inspect the signed release before uploading. The workflow validates both profiles, the shared group, and the certificate, then signs and embeds the extension.
 
 The app and widget both use version 1.2 and the same CI build number. Secrets never belong in source control. Old profiles without App Groups will deliberately fail validation with instructions instead of producing a broken widget.
 
