@@ -75,3 +75,8 @@ Development branch: `codex/widgets-1.2`; draft PR: https://github.com/aceher-1/c
 - Plist parsing, shared-hours JSON parsing, release Bash syntax, and git whitespace checks passed.
 
 The native tests precede the final widget-only presentation/setup-state refinements; the final release archive compiled those refinements. No real-device widget layout/refresh verification or signed version 1.2 upload has been performed. Follow WIDGETS.md for the Apple App Group/profile setup and release checklist. GitHub Pages rejected the initial feature-branch deployment under its existing branch protection; the final workflow deliberately skips deployment on feature branches. Publish the shared hours through the default branch after merge.
+
+
+### Signed widget beta uploaded
+
+Version **1.2 (2006.1)** was successfully archived, signed, exported, and uploaded to TestFlight with the pinned upload action on October 19, 2026: https://github.com/aceher-1/cc_app/actions/runs/39333929584. Both app and widget profiles passed App Group/certificate validation; temporary signing credentials were removed. This supersedes the earlier unsigned-only status. Apple processing and real-iPhone widget testing remain separate from upload acceptance. The version 1.1 App Review submission was not replaced.
