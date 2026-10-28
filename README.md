@@ -2,9 +2,7 @@
 
 See what's being served at the **MSOE Robert Spitzer Dining Commons**. Browse meals, search dishes, save dietary choices, and arrange the menu the way you like it.
 
-New builds appear on your Home Screen as **MSOE Dining**. For TestFlight and App Store uploads, follow the [Windows publishing guide](APP_STORE.md); the download instructions below are for sideloading.
-
-The registered app identifier is now `com.aceher.msoedining`. If you installed an older build with the `com.example` identifier, this installs as a separate app and those saved choices do not transfer automatically. Later updates using the same identifier retain your choices.
+The app appears on your Home Screen as **MSOE Dining**.
 
 [Install the app](#install-commons-on-your-iphone) · [Learn the controls](#using-commons) · [Get help](#having-trouble)
 
@@ -19,9 +17,7 @@ You will need:
 - Your Apple Account: the email and password you use for the App Store.
 - A free [GitHub account](https://github.com/signup) to download the app.
 
-**Commons is not available in the App Store yet.** You install it using a free computer app called Sideloadly. With a free Apple Account, the installation needs to be renewed every **seven days**. This guide explains how. Commons itself has no login.
-
-Planning to publish the app? See the [Windows-to-App-Store checklist](APP_STORE.md) for the remaining setup.
+For manual installation from GitHub, use the Sideloadly instructions below. With a free Apple Account, the installation needs to be renewed every **seven days**. This guide explains how. Commons itself has no login.
 
 ## Install Commons on your iPhone
 
@@ -103,12 +99,9 @@ Still stuck? [Ask for help](https://github.com/aceher-1/cc_app/issues) and inclu
 
 ## Your privacy
 
-Read the [privacy policy](https://aceher-1.github.io/cc_app/privacy.html). Its source is maintained in [public/privacy.html](public/privacy.html) and published alongside the shared menus.
+Read the [privacy policy](https://aceher-1.github.io/cc_app/privacy.html).
 
 Your dietary and section choices are saved on your phone and are not sent with menu requests. Downloads use GitHub's hosting, which [records IP addresses for security](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection).
 
-## For contributors
 
-See the [developer guide](DEVELOPMENT.md) for code, testing, and menu-update details, or the [verification notes](CHECKS.md) for completed checks.
-
-[this app is not endorsed by, directly affiliated with, maintained, authorized, or sponsored by MSOE or any MSOE partner/subsidiary](NON_AFFILIATION_STATEMENT.md)
+This app is not endorsed by, directly affiliated with, maintained, authorized, or sponsored by MSOE or any MSOE partner/subsidiary.
