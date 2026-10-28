@@ -52,11 +52,11 @@ jobs:
         run: |
           set -euo pipefail
           for name in APPLE_TEAM_ID APPLE_DISTRIBUTION_P12_BASE64 APPLE_DISTRIBUTION_P12_PASSWORD APPLE_PROFILE_BASE64 APPLE_WIDGET_PROFILE_BASE64; do
-            if [ -z "${!name}" ]; then echo "::error::Add the $name Actions secret; see APP_STORE.md."; exit 1; fi
+            if [ -z "${!name}" ]; then echo "::error::Add the $name secret in repository Settings > Secrets and variables > Actions."; exit 1; fi
           done
           if [ "$DESTINATION" = testflight ]; then
             for name in ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do
-              if [ -z "${!name}" ]; then echo "::error::Add the $name Actions secret; see APP_STORE.md."; exit 1; fi
+              if [ -z "${!name}" ]; then echo "::error::Add the $name secret in repository Settings > Secrets and variables > Actions."; exit 1; fi
             done
           fi
       - name: Install signing credentials in a temporary keychain

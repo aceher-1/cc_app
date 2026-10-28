@@ -1,6 +1,6 @@
 # Install Commons on your iPhone
 
-New builds appear as **MSOE Dining**. The app now uses the registered identifier `com.aceher.msoedining`. Moving from an older `com.example` build creates a separate app; saved choices do not transfer automatically. Later updates with the same identifier preserve them. For TestFlight uploads, use the [Windows publishing guide](https://github.com/aceher-1/cc_app/blob/codex/initial-app/APP_STORE.md).
+The app appears on your Home Screen as **MSOE Dining**. Updates installed over the existing app preserve your saved choices.
 
 ## Before you start
 
@@ -13,7 +13,7 @@ You will need:
 - Your Apple Account: the email and password you use for the App Store.
 - A free [GitHub account](https://github.com/signup) to download the app.
 
-**Commons is not available in the App Store yet.** You install it using a free computer app called Sideloadly. With a free Apple Account, the installation needs to be renewed every **seven days**. This guide explains how. Commons itself has no login.
+This guide covers manual installation from GitHub using Sideloadly. With a free Apple Account, the installation needs to be renewed every **seven days**. This guide explains how. Commons itself has no login.
 
 ## Install Commons on your iPhone
 

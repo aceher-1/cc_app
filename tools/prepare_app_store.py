@@ -27,7 +27,7 @@ def export_options(profile, team_id, identities, now=None, bundle_id=BUNDLE_ID, 
     if entitlements.get("application-identifier") != f"{team_id}.{bundle_id}":
         raise ValueError(f"The profile must be explicitly registered for {bundle_id} on this team.")
     if require_group and APP_GROUP not in entitlements.get("com.apple.security.application-groups", []):
-        raise ValueError(f"Enable {APP_GROUP} for {bundle_id} and regenerate its App Store profile; see WIDGETS.md.")
+        raise ValueError(f"Enable {APP_GROUP} for {bundle_id} and regenerate its App Store Connect distribution profile.")
     if entitlements.get("com.apple.developer.team-identifier") != team_id:
         raise ValueError("The profile's signing entitlement does not match APPLE_TEAM_ID.")
     if entitlements.get("get-task-allow", True) or "ProvisionedDevices" in profile or profile.get("ProvisionsAllDevices"):
