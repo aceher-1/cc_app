@@ -87,6 +87,12 @@ Download the newest app file from the same download page, then repeat step 3. Us
 
 **About dietary information:** labels and ingredients come from Sodexo and can be incomplete or change. Confirm allergens and preparation with dining staff. **Halal: potentially suitable** is an ingredient screen, not halal certification; it cannot verify ingredient sources or preparation.
 
+## Plan your meals
+
+Choose a date, then tap **Plan meals for this day**. Browse each meal, optionally sort by **Higher protein** or **Lower carb**, and add whole servings. The planner shows meal subtotals and a day total. Saved plans stay on your phone and can be cleared by date.
+
+Suggestions use your dietary filters and Sodexo’s reported values. Missing values are marked, and totals with gaps show only the known amounts.
+
 ## Home Screen widgets
 
 Open the app once after installing an update to share your saved settings with its widgets. Touch and hold an empty area on your iPhone Home Screen, choose **Edit > Add Widget**, search for **MSOE Dining**, and select a size.

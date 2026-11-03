@@ -7,6 +7,7 @@ struct MenuView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showFilters = false
     @State private var showLayout = false
+    @State private var showPlanner = false
     @State private var expandedFilteredStations: Set<String> = []
     @State private var refreshConfirmation: String?
     @Namespace private var mealSelection
@@ -18,6 +19,9 @@ struct MenuView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     header
                     dateStrip
+                    Button { showPlanner = true } label: {
+                        Label("Plan meals for this day", systemImage: "list.bullet.rectangle")
+                    }.buttonStyle(.bordered).padding(.horizontal, 20)
                     mealPicker
                     menuContent
                     footer
@@ -59,6 +63,7 @@ struct MenuView: View {
             .searchable(text: $store.searchText, prompt: "Search dishes or stations")
             .refreshable { await refreshMenu() }
             .sheet(isPresented: $showFilters) { FiltersView().environmentObject(store) }
+            .sheet(isPresented: $showPlanner) { MealPlannerView(dateKey: store.selectedDateKey).environmentObject(store) }
             .sheet(isPresented: $showLayout) { SectionLayoutView().environmentObject(store) }
             .task(id: store.selectedDateKey) { await store.load() }
             .onChange(of: store.selectedDateKey) { _, _ in refreshConfirmation = nil }
