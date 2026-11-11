@@ -6,7 +6,7 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from prepare_app_store import BUNDLE_ID, export_options
+from prepare_app_store import APP_GROUP, BUNDLE_ID, WIDGET_BUNDLE_ID, export_options
 
 
 class AppStoreSigningTests(unittest.TestCase):
@@ -50,6 +50,17 @@ class AppStoreSigningTests(unittest.TestCase):
     def test_rejects_missing_or_unmatched_private_key_identity(self):
         with self.assertRaisesRegex(ValueError, "private key"):
             export_options(self.profile, self.team, "0 valid identities found", self.now)
+
+    def test_widget_profile_requires_its_own_identifier_and_shared_group(self):
+        with self.assertRaisesRegex(ValueError, "Enable"):
+            export_options(self.profile, self.team, self.identity, self.now, require_group=True)
+        profile = copy.deepcopy(self.profile)
+        profile["Entitlements"]["com.apple.security.application-groups"] = [APP_GROUP]
+        with self.assertRaisesRegex(ValueError, "explicitly registered"):
+            export_options(profile, self.team, self.identity, self.now, bundle_id=WIDGET_BUNDLE_ID, require_group=True)
+        profile["Entitlements"]["application-identifier"] = f"{self.team}.{WIDGET_BUNDLE_ID}"
+        options = export_options(profile, self.team, self.identity, self.now, bundle_id=WIDGET_BUNDLE_ID, require_group=True)
+        self.assertEqual(options["provisioningProfiles"], {WIDGET_BUNDLE_ID: profile["UUID"]})
 
 
 if __name__ == "__main__":

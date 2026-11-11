@@ -11,6 +11,7 @@ on:
         options:
           - full
           - section-reorder
+          - widgets
 permissions:
   contents: read
 jobs:
@@ -47,8 +48,21 @@ jobs:
           TEST_SELECTION=()
           if [ "$TEST_SCOPE" = section-reorder ]; then
             TEST_SELECTION=(-only-testing:CommonsUITests/CommonsUITests/testDraggingSectionOrderSurvivesRelaunch)
+          elif [ "$TEST_SCOPE" = widgets ]; then
+            TEST_SELECTION=(-only-testing:CommonsTests)
           fi
           xcodebuild test -project Commons.xcodeproj -scheme Commons -destination "platform=iOS Simulator,id=$SIMULATOR_ID" -parallel-testing-enabled NO -resultBundlePath build/Commons.xcresult "${TEST_SELECTION[@]}" CODE_SIGNING_ALLOWED=NO | tee build/xcodebuild.log
+      - name: Check embedded widget in a device release archive
+        if: inputs.test_scope == 'widgets'
+        run: |
+          set -euo pipefail
+          xcodebuild archive -project Commons.xcodeproj -scheme Commons -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/WidgetCheck.xcarchive \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO | tee build/widget-archive.log
+          APP=build/WidgetCheck.xcarchive/Products/Applications/Commons.app
+          WIDGET="$APP/PlugIns/CommonsWidgets.appex"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$WIDGET/Info.plist")" = com.aceher.msoedining.widgets
+          test "$(xcrun lipo -archs "$WIDGET/CommonsWidgets")" = arm64
       - name: Export test screenshots as PNG for Windows review
         if: always()
         run: |

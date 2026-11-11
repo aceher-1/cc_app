@@ -3,8 +3,8 @@ import Combine
 
 @MainActor
 final class MenuStore: ObservableObject {
-    @Published var preferences: DietaryPreferences { didSet { preferenceStorage.save(preferences) } }
-    @Published var layout: MenuLayoutPreferences { didSet { layoutStorage.save(layout) } }
+    @Published var preferences: DietaryPreferences { didSet { preferenceStorage.save(preferences); syncWidgetSettings() } }
+    @Published var layout: MenuLayoutPreferences { didSet { layoutStorage.save(layout); syncWidgetSettings() } }
     @Published var selectedDateKey: String
     @Published var selectedMealName = ""
     @Published var searchText = ""
@@ -32,6 +32,23 @@ final class MenuStore: ObservableObject {
         lastTodayKey = today
         if let saved = cache.read(today) { menus[today] = saved }
         cache.prune(now: Date())
+        syncWidgetSettings()
+        if defaults === UserDefaults.standard, let saved = menus[today] { WidgetSync.menu(saved) }
+    }
+
+    private func syncWidgetSettings() {
+        guard defaults === UserDefaults.standard else { return }
+        WidgetSync.settings(preferences, layout: layout)
+    }
+
+    func openWidgetURL(_ url: URL) {
+        guard url.scheme == "msoedining", url.host == "menu",
+              let parts = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let date = parts.queryItems?.first(where: { $0.name == "date" })?.value,
+              dates.contains(where: { DiningDay.key(for: $0) == date }) else { return }
+        selectedDateKey = date
+        selectedMealName = parts.queryItems?.first(where: { $0.name == "meal" })?.value ?? ""
+        searchText = ""
     }
 
     var currentMenu: DayMenu? { menus[selectedDateKey] }
@@ -133,6 +150,7 @@ final class MenuStore: ObservableObject {
         do {
             let menu = try await service.fetch(dateKey: key, now: now)
             menus[key] = menu
+            if defaults === UserDefaults.standard { WidgetSync.menu(menu) }
             if !DiningDay.isSourceFresh(menu, now: now) {
                 messages[key] = "The shared menu has not updated today. Showing its latest published version."
             }

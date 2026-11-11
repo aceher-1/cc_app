@@ -19,6 +19,9 @@ struct CommonsApp: App {
         _store = StateObject(wrappedValue: MenuStore())
     }
     var body: some Scene {
-        WindowGroup { MenuView().environmentObject(store).tint(CommonsTheme.red) }
+        WindowGroup {
+            MenuView().environmentObject(store).tint(CommonsTheme.red)
+                .onOpenURL { store.openWidgetURL($0) }
+        }
     }
 }

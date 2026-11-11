@@ -2,6 +2,8 @@
 
 See what's being served at the **MSOE Robert Spitzer Dining Commons**. Browse meals, search dishes, save dietary choices, and arrange the menu the way you like it.
 
+The version 1.2 update adds small and medium Home Screen widgets with filtered meal previews and scheduled countdowns. Weekend widgets show Brunch with hours unavailable.
+
 The app appears on your Home Screen as **MSOE Dining**.
 
 [Install the app](#install-commons-on-your-iphone) · [Learn the controls](#using-commons) · [Get help](#having-trouble)
@@ -84,6 +86,16 @@ Download the newest app file from the same download page, then repeat step 3. Us
 - **Check for a menu update:** tap **MSOE** with the refresh arrow in the top-left corner, or pull down on the menu. Menus update daily, and previously opened menus remain available without internet.
 
 **About dietary information:** labels and ingredients come from Sodexo and can be incomplete or change. Confirm allergens and preparation with dining staff. **Halal: potentially suitable** is an ingredient screen, not halal certification; it cannot verify ingredient sources or preparation.
+
+## Home Screen widgets
+
+Open the app once after installing an update to share your saved settings with its widgets. Touch and hold an empty area on your iPhone Home Screen, choose **Edit > Add Widget**, search for **MSOE Dining**, and select a size.
+
+- **Small:** previews the current or upcoming meal.
+- **Medium:** previews the current and next meals.
+- Both use your saved dietary filters and section order. Tap a meal to open its full menu.
+- Weekday countdowns use scheduled Milwaukee meal times. Individual stations may differ, and iOS controls when widgets refresh.
+- Weekends show **Brunch** with **Hours unavailable**. Missing or expired hours also show as unavailable.
 
 ## Having trouble?
 
