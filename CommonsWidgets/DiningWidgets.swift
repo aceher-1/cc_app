@@ -49,7 +49,7 @@ struct DiningProvider: TimelineProvider {
             guard let day = DiningDay.calendar.date(byAdding: .day, value: offset, to: now) else { continue }
             let key = DiningDay.key(for: day)
             if let saved = storage.cache.read(key), DiningDay.isFresh(saved, now: now),
-               DiningDay.isSourceFresh(saved, now: now) { continue }
+               DiningDay.isSourceFresh(saved, now: now), saved.itemCount > 0 { continue }
             if let menu = try? await service.fetch(dateKey: key, now: now) { try? storage.cache.write(menu) }
         }
         let hoursChecked = storage.read("hours-checked.json", as: Date.self)
