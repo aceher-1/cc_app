@@ -35,6 +35,25 @@ final class MenuStoreTests: XCTestCase {
         store.openWidgetURL(URL(string: "https://menu?date=\(DiningDay.key(for: Date()))&meal=Lunch")!)
         XCTAssertEqual(store.selectedMealName, "Dinner")
     }
+    func testEmptyPublicationIsRetriedInsteadOfPinnedForTheDay() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let suite = "CommonsEmptyRetryTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { try? FileManager.default.removeItem(at: directory); defaults.removePersistentDomain(forName: suite) }
+        let service = StubMenuService()
+        let store = MenuStore(service: service, cache: DailyCache(directory: directory), defaults: defaults)
+        let now = Date()
+        await store.load(now: now)
+        await store.load(now: now.addingTimeInterval(60))
+        let initialCalls = await service.calls
+        XCTAssertEqual(initialCalls, 1)
+        let mealData = Data(#"[{"name":"Lunch","groups":[{"name":"Grill","items":[{"name":"Newly posted dish"}]}]}]"#.utf8)
+        await service.setMeals(try MenuParser.parse(mealData, dateKey: store.selectedDateKey, fetchedAt: now).meals)
+        await store.load(now: now.addingTimeInterval(901))
+        let retriedCalls = await service.calls
+        XCTAssertEqual(retriedCalls, 2)
+        XCTAssertEqual(store.currentMenu?.itemCount, 1)
+    }
     func testEntirelyFilteredStationRemainsAvailableAndSearchLimitsHiddenItems() async throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let suite = "CommonsHiddenTests.\(UUID().uuidString)"
