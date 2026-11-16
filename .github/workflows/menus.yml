@@ -3,11 +3,15 @@ on:
   push:
     paths:
       - tools/refresh_menus.py
+      - tools/publication_needed.py
       - tools/tests/**
       - public/**
       - .github/workflows/menus.yml
   schedule:
     - cron: '23 4 * * *'
+      timezone: America/Chicago
+    # Catch a delayed daily run or menus posted after an early empty response.
+    - cron: '47 5-23 * * *'
       timezone: America/Chicago
   workflow_dispatch:
 permissions:
@@ -17,6 +21,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
+    outputs:
+      publish: ${{ steps.health.outputs.needed }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -29,18 +35,28 @@ jobs:
           python-version: '3.12'
       - name: Test publication and failure handling
         run: python -m unittest discover -s tools/tests -v
+      - name: Check whether today's publication needs recovery
+        id: health
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: python tools/publication_needed.py
       # Check Pages access before spending time fetching upstream menus.
       - name: Check GitHub Pages configuration
+        if: steps.health.outputs.needed == 'true'
         uses: actions/configure-pages@v5
       - name: Fetch all menu dates once centrally
+        if: steps.health.outputs.needed == 'true'
         run: python tools/refresh_menus.py --output _site
       - name: Include public privacy policy
+        if: steps.health.outputs.needed == 'true'
         run: cp -R public/. _site/
       - uses: actions/upload-pages-artifact@v4
+        if: steps.health.outputs.needed == 'true'
         with:
           path: _site
   deploy:
     needs: build
+    if: needs.build.outputs.publish == 'true' && github.ref == 'refs/heads/codex/initial-app'
     runs-on: ubuntu-latest
     permissions:
       pages: write

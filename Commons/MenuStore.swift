@@ -118,8 +118,9 @@ final class MenuStore: ObservableObject {
         guard !loadingDates.contains(key) else { return }
         if !force, let saved = menus[key], DiningDay.isFresh(saved, now: now) {
             // An early opening before the daily server job must not pin yesterday's snapshot all day.
-            if DiningDay.isSourceFresh(saved, now: now)
-                || now.timeIntervalSince(saved.checkedAt ?? saved.fetchedAt) < 3600 { return }
+            let retryInterval: TimeInterval = saved.itemCount == 0 ? 900 : 3600
+            if (saved.itemCount > 0 && DiningDay.isSourceFresh(saved, now: now))
+                || now.timeIntervalSince(saved.checkedAt ?? saved.fetchedAt) < retryInterval { return }
         }
         let attemptKey = "commons.lastAttempt.\(key)"
         if !force, let attempt = defaults.object(forKey: attemptKey) as? Date, now.timeIntervalSince(attempt) < 300 {
